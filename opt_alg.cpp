@@ -36,7 +36,47 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 	{
 		double* p = new double[2]{ 0,0 };
 		//Tu wpisz kod funkcji
+		int i = 0;
+		double x1 = x0 + d;
+		double fx0 = ff(x0, NAN, NAN)(0);
+		double fx1 = ff(x1, NAN, NAN)(0);
+		vector<double> x_vector;
+		x_vector.push_back(x0);
+		x_vector.push_back(x1);
 
+		if (fx0 == fx1) {
+			p[0] = x0;
+			p[1] = x1;
+			return p;
+		}
+
+		if (fx1 > fx0) {
+			d = -d;
+			x1 = x0 + d;
+			x_vector[1] = x1;
+			fx1 = ff(x1, NAN, NAN)(0);
+			if (fx1 >= fx0) {
+				p[0] = x1;
+				p[1] = x0 - d;
+				return p;
+			}
+		}
+
+		do {
+			if (i > Nmax)
+				exit(-1);
+			i++;
+			x_vector.push_back(x0 + (pow(alpha, i) * d));
+		} while (ff(x_vector[i], NAN, NAN) <= ff(x_vector[i+1], NAN, NAN));
+
+		if (d > 0) {
+			p[0] = x_vector[i - 1];
+			p[1] = x_vector[i + 1];
+			return p;
+		}
+
+		p[0] = x_vector[i + 1];
+		p[1] = x_vector[i - 1];
 		return p;
 	}
 	catch (string ex_info)
