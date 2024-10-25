@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		lab0();
+		lab1();
 	}
 	catch (string EX_INFO)
 	{
@@ -68,7 +68,26 @@ void lab0()
 
 void lab1()
 {
+	double* res = new double[2] { 0, 0 };
+	double x0 = 2;
+	double d = 18;
+	double alpha = 1.5;
+	int Nmax = 10000;
+	res = expansion(ff1T, x0, d, alpha, Nmax);
+	cout << res[0] << endl << res[1] << endl;
 
+
+	double a = 2;
+	double b = 100;
+	double epsilon = 0.0001;
+	res = expansion(ff1T, a, abs(a - b), alpha, Nmax);
+	solution wynik;
+	wynik = fib(ff1T, res[0], res[1], epsilon);
+	//cout << wynik << endl;
+
+	double gamma = 0.0001;
+	wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+	cout << wynik << endl;
 }
 
 void lab2()

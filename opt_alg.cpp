@@ -64,7 +64,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 
 		do {
 			if (i > Nmax)
-				exit(-1);
+				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
 		} while (ff(x_vector[i], NAN, NAN) <= ff(x_vector[i+1], NAN, NAN));
@@ -90,8 +90,41 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
+		Xopt.clear_calls;
 		//Tu wpisz kod funkcji
+		vector<double> ciag_fib;
+		ciag_fib.push_back(1.0);
+		ciag_fib.push_back(1.0);
 
+		while (ciag_fib.back() <= (b - a) / epsilon) {
+			ciag_fib.push_back(ciag_fib[ciag_fib.size() - 1] + ciag_fib[ciag_fib.size() - 2]);
+		}
+
+		int k = 1;
+		while (true) {
+			if (ciag_fib[k] > (b - a) / epsilon)
+				break;
+			k++;
+		}
+
+		double c = b - (ciag_fib[k - 1] / (ciag_fib[k] * (b - a)));
+		double d = a + b - c;
+
+		for (int i = 0; i < k - 3; i++) {
+			if (ff(c, NAN, NAN)(0) < ff(d, NAN, NAN)(0)) {
+				a = a; //Niepotrzebne ale spojne z pseudokodem
+				b = d;
+			}
+			else {
+				b = b; //Niepotrzebne ale spojne z pseudokodem
+				a = c;
+			}
+			c = b - (ciag_fib[k - i - 2] / (ciag_fib[k - i - 1] * (b - a)));
+			d = a + b - c;
+		}
+
+		Xopt.x = c; // Nie wiem czy uzywac tego konstruktora czy po prostu dac "= c"
+		Xopt.y = ff(c, NAN, NAN)(0);
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -107,6 +140,56 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		int i = 0;
+		double c = (a + b) / 2;
+		double d;
+		double prev_d = INFINITY; //Sluzy jako d[i-1]
+		while(true) {
+			double l = (ff(a, NAN, NAN)(0) * (pow(b, 2) - pow(c, 2))) + (ff(b, NAN, NAN)(0) * (pow(c, 2) - pow(a, 2))) + (ff(c, NAN, NAN)(0) * (pow(a, 2) - pow(b, 2)));
+			double m = (ff(a, NAN, NAN)(0) * (b - c) + ff(b, NAN, NAN)(0) * (c - a) + ff(c, NAN, NAN)(0) * (a - b));
+			Xopt.f_calls += 6;
+			if (m <= 0) {
+				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+			}
+			d = 0.5 * l / m;
+			if (a < d && d < c) {
+				if (ff(d, NAN, NAN)(0) < ff(c, NAN, NAN)(0)) {
+					a = a;
+					c = d;
+					b = c;
+				}
+				else {
+					a = d;
+					c = c;
+					b = b;
+				}
+			}
+			else if (c < d && d < b) {
+				if (ff(d, NAN, NAN)(0) < ff(c, NAN, NAN)(0)) {
+					a = c;
+					c = d;
+					b = b;
+				} 
+				else {
+					a = a;
+					c = c;
+					b = d;
+				}
+			}
+			else {
+				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+			}
+			if (Xopt.f_calls > Nmax) {
+				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+			}
+			if (b - a < epsilon || abs(d - prev_d) < gamma) {
+				break;
+			}
+			prev_d = d;
+		} 
+
+		Xopt.x = d;
+		Xopt.y = ff(d, NAN, NAN)(0);
 
 		return Xopt;
 	}
