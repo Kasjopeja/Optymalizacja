@@ -67,7 +67,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
-		} while (ff(x_vector[i], NAN, NAN) <= ff(x_vector[i+1], NAN, NAN));
+		} while (ff(x_vector[i], NAN, NAN) >= ff(x_vector[i+1], NAN, NAN));
 
 		if (d > 0) {
 			p[0] = x_vector[i - 1];
