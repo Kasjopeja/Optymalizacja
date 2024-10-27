@@ -67,7 +67,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
-		} while (ff(x_vector[i], NAN, NAN) <= ff(x_vector[i+1], NAN, NAN));
+		} while (ff(x_vector[i], NAN, NAN) >= ff(x_vector[i+1], NAN, NAN));
 
 		if (d > 0) {
 			p[0] = x_vector[i - 1];
@@ -107,7 +107,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			k++;
 		}
 
-		double c = b - (ciag_fib[k - 1] / (ciag_fib[k] * (b - a)));
+		double c = b - (ciag_fib[k - 1] / ciag_fib[k]) * (b - a);
 		double d = a + b - c;
 
 		for (int i = 0; i < k - 3; i++) {
@@ -119,7 +119,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				b = b; //Niepotrzebne ale spojne z pseudokodem
 				a = c;
 			}
-			c = b - (ciag_fib[k - i - 2] / (ciag_fib[k - i - 1] * (b - a)));
+			c = b - (ciag_fib[k - i - 2] / ciag_fib[k - i - 1]) * (b - a);
 			d = a + b - c;
 		}
 
@@ -149,7 +149,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			double m = (ff(a, NAN, NAN)(0) * (b - c) + ff(b, NAN, NAN)(0) * (c - a) + ff(c, NAN, NAN)(0) * (a - b));
 			Xopt.f_calls += 6;
 			if (m <= 0) {
-				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+				exit(-1); //Tutaj program sie wykrzacza; W pseudokodzie bylo return error nie wiem jak to interpretowac
 			}
 			d = 0.5 * l / m;
 			if (a < d && d < c) {

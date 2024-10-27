@@ -68,26 +68,24 @@ void lab0()
 
 void lab1()
 {
-	double* res = new double[2] { 0, 0 };
-	double x0 = 2;
-	double d = 18;
-	double alpha = 1.5;
-	int Nmax = 10000;
-	res = expansion(ff1T, x0, d, alpha, Nmax);
-	cout << res[0] << endl << res[1] << endl;
+	//double* res = new double[2] { 0, 0 };
+	//double x0 = 60;
+	//double d = 1;
+	//double alpha = 1.5;
+	//int Nmax = 10000;
+	//res = expansion(ff1T, x0, d, alpha, Nmax);
+	//cout << res[0] << endl << res[1] << endl;
 
-
-	double a = 2;
-	double b = 100;
+	double a = 50;
+	double b = 70;
 	double epsilon = 0.0001;
-	res = expansion(ff1T, a, abs(a - b), alpha, Nmax);
 	solution wynik;
-	wynik = fib(ff1T, res[0], res[1], epsilon);
-	//cout << wynik << endl;
-
-	double gamma = 0.0001;
-	wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+	wynik = fib(ff1T, a, b, epsilon);
 	cout << wynik << endl;
+
+	//double gamma = 0.000001;
+	//wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+	//cout << wynik << endl;
 }
 
 void lab2()
