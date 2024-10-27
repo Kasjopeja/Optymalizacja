@@ -289,9 +289,9 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				break;
 			}
 		}
-
-		Xopt.x = D.x;
-		Xopt.y = D.y;
+		D.fit_fun(ff);
+		Xopt.x = D.x(0);
+		Xopt.y = D.y(0);
 		Xopt.flag = 1;
 		return Xopt;
 	}
