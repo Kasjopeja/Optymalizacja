@@ -140,57 +140,66 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		solution A(a), B(b), C, D, D0;
+		C.x = (a + b) / 2;
+		A.fit_fun(ff);
+		B.fit_fun(ff);
+		C.fit_fun(ff);
+		double l, m;
 		int i = 0;
-		double c = (a + b) / 2;
-		double d;
-		double prev_d = INFINITY; //Sluzy jako d[i-1]
 		while(true) {
-			double l = (ff(a, NAN, NAN)(0) * (pow(b, 2) - pow(c, 2))) + (ff(b, NAN, NAN)(0) * (pow(c, 2) - pow(a, 2))) + (ff(c, NAN, NAN)(0) * (pow(a, 2) - pow(b, 2)));
-			double m = (ff(a, NAN, NAN)(0) * (b - c) + ff(b, NAN, NAN)(0) * (c - a) + ff(c, NAN, NAN)(0) * (a - b));
-			Xopt.f_calls += 6;
+			l = A.y(0) * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y(0) * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y(0) * (pow(A.x(0), 2) - pow(B.x(0), 2));
+			m = (A.y(0) * (B.x(0) - C.x(0))) + (B.y(0) * (C.x(0) - A.x(0))) + (C.y(0) * (A.x(0) - B.x(0)));
 			if (m <= 0) {
-				exit(-1); //Tutaj program sie wykrzacza; W pseudokodzie bylo return error nie wiem jak to interpretowac
-			}
-			d = 0.5 * l / m;
-			if (a < d && d < c) {
-				if (ff(d, NAN, NAN)(0) < ff(c, NAN, NAN)(0)) {
-					a = a;
-					c = d;
-					b = c;
-				}
-				else {
-					a = d;
-					c = c;
-					b = b;
-				}
-			}
-			else if (c < d && d < b) {
-				if (ff(d, NAN, NAN)(0) < ff(c, NAN, NAN)(0)) {
-					a = c;
-					c = d;
-					b = b;
-				} 
-				else {
-					a = a;
-					c = c;
-					b = d;
-				}
-			}
-			else {
-				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
-			}
-			if (Xopt.f_calls > Nmax) {
-				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
-			}
-			if (b - a < epsilon || abs(d - prev_d) < gamma) {
+				Xopt.flag = 0;
 				break;
 			}
-			prev_d = d;
+			D0.x = D.x;
+			D.x = l / (2 * m);
+			D.fit_fun(ff);
+			if (A.x(0) < D.x(0) && D.x(0) < C.x(0))
+			{
+				if (D.y(0) < C.y(0))
+				{
+					B.x = C.x;
+					C.x = D.x;
+					B.fit_fun(ff);
+					C.fit_fun(ff);
+				}
+				else
+					A.x = D.x;
+				A.fit_fun(ff);
+			}
+			else if (C.x(0) < D.x(0) && D.x(0) < B.x(0))
+			{
+				if (D.y(0) < C.y(0))
+				{
+					A.x = C.x;
+					C.x = D.x;
+					A.fit_fun(ff);
+					C.fit_fun(ff);
+				}
+				else
+					B.x = D.x;
+				B.fit_fun(ff);
+			}
+			else {
+				Xopt.flag = 0;
+				break;
+			}
+			if (i > Nmax) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (B.x(0) - A.x(0) < epsilon || abs(D.x(0) - D0.x(0)) <= gamma)
+			{
+				break;
+			}
 		} 
 
-		Xopt.x = d;
-		Xopt.y = ff(d, NAN, NAN)(0);
-
+		Xopt.x = D.x;
+		Xopt.y = D.y;
+		Xopt.flag = 1;
 		return Xopt;
 	}
 	catch (string ex_info)
