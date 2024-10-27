@@ -1,4 +1,4 @@
-#include"user_funs.h"
+﻿#include"user_funs.h"
 
 matrix ff0T(matrix x, matrix ud1, matrix ud2)
 {
@@ -37,3 +37,34 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2) {
 	return -cos(0.1 * x(0)) * exp(-pow((0.1 * x(0) - 2 * 3.14), 2)) + 0.002 * pow((0.1 * x(0)), 2);
 }
 
+matrix df1(double t, matrix Y, matrix ud1, matrix ud2) {
+    matrix dY(Y);  // dY to macierz przechowująca pochodne VA', VB' i TB'
+
+    // Parametry stałe
+    double a = 0.98;            // wsp. lepkości
+    double b = 0.63;            // wsp. zwężenia strumienia
+    double g = 9.81;            // przysp. ziemskie
+    double PA = 0.5;              // pole pow. zbiornika A
+    double PB = 1;              // pole pow. zbiornika B
+    double DB = 0.00365665;     // wielkość otworu w zbiorniku B
+    double Fin = 0.01;          // ilość wody wpływającej do B (z rury)
+    double Tin = 20;            // temp. wody wpływającej
+    double TA = 90.0;           // temp. wody w zbiorniku A
+    double DA = 0.005;          // wielkość otworu w zbiorniku A (parametr z ud2)
+
+    // Stan w danym momencie, podany przez wektor Y
+    double VA = Y(0);           // objętość w zbiorniku A
+    double VB = Y(1);           // objętość w zbiorniku B
+    double TB = Y(2);           // temperatura w zbiorniku B
+
+    // Obliczenie przepływu wody z A i B
+    double FAout = VA > 0 ? a * b * DA * sqrt(2 * g * VA / PA) : 0;
+    double FBout = VB > 0 ? a * b * DB * sqrt(2 * g * VB / PB) : 0;
+
+    // Obliczenie pochodnych VA', VB' i TB'
+    dY(0) = -FAout;                                 // VA' (zmiana objętości w A)
+    dY(1) = FAout + Fin - FBout;                    // VB' (zmiana objętości w B)
+    dY(2) = FAout / VB * (TA - TB) + Fin / VB * (Tin - TB); // TB' (zmiana temperatury w B)
+
+    return dY;
+}
