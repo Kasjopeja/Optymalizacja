@@ -34,49 +34,100 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 {
 	try
 	{
-		double* p = new double[2]{ 0,0 };
+		double* p = new double[2] { 0, 0 };
 		//Tu wpisz kod funkcji
-		int i = 0;
-		double x1 = x0 + d;
-		double fx0 = ff(x0, NAN, NAN)(0);
-		double fx1 = ff(x1, NAN, NAN)(0);
-		vector<double> x_vector;
-		x_vector.push_back(x0);
-		x_vector.push_back(x1);
+		//Wersja bez f_calls
+		//int i = 0;
+		//double x1 = x0 + d;
+		//double fx0 = ff(x0, NAN, NAN)(0);
+		//double fx1 = ff(x1, NAN, NAN)(0);
+		//vector<double> x_vector;
+		//x_vector.push_back(x0);
+		//x_vector.push_back(x1);
 
-		if (fx0 == fx1) {
-			p[0] = x0;
-			p[1] = x1;
+		//if (fx0 == fx1) {
+		//	p[0] = x0;
+		//	p[1] = x1;
+		//	return p;
+		//}
+
+		//if (fx1 > fx0) {
+		//	d = -d;
+		//	x1 = x0 + d;
+		//	x_vector[1] = x1;
+		//	fx1 = ff(x1, NAN, NAN)(0);
+		//	if (fx1 >= fx0) {
+		//		p[0] = x1;
+		//		p[1] = x0 - d;
+		//		return p;
+		//	}
+		//}
+
+		//do {
+		//	if (i > Nmax)
+		//		exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+		//	i++;
+		//	x_vector.push_back(x0 + (pow(alpha, i) * d));
+		//} while (ff(x_vector[i], NAN, NAN) >= ff(x_vector[i + 1], NAN, NAN));
+
+		//if (d > 0) {
+		//	p[0] = x_vector[i - 1];
+		//	p[1] = x_vector[i + 1];
+		//	return p;
+		//}
+
+		//p[0] = x_vector[i + 1];
+		//p[1] = x_vector[i - 1];
+		//return p;
+
+
+		//Wersja pod f_calls
+
+		solution X0(x0);
+		solution X1(x0 + d);
+		//solution X2;
+		X0.fit_fun(ff);
+		X1.fit_fun(ff);
+		vector<solution> x_vector;
+		x_vector.push_back(X0);
+		x_vector.push_back(X1);
+
+		if (X0.y(0) == X1.y(0)) {
+			p[0] = X0.x(0);
+			p[1] = X1.x(0);
 			return p;
 		}
 
-		if (fx1 > fx0) {
+		if (X1.y(0) > X0.y(0)) {
 			d = -d;
-			x1 = x0 + d;
-			x_vector[1] = x1;
-			fx1 = ff(x1, NAN, NAN)(0);
-			if (fx1 >= fx0) {
-				p[0] = x1;
-				p[1] = x0 - d;
+			X1.x(0) = X0.x(0) + d;
+			X1.fit_fun(ff);
+			x_vector[1] = X1;
+			if (X1.y(0) >= X0.y(0)) {
+				p[0] = X1.x(0);
+				p[1] = X0.x(0) - d;
 				return p;
 			}
 		}
 
-		do {
-			if (i > Nmax)
-				exit(-1); //W pseudokodzie bylo return error nie wiem jak to interpretowac
+		int i = 0;
+		do
+		{
+			if (X0.f_calls > Nmax)
+				break;
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
-		} while (ff(x_vector[i], NAN, NAN) >= ff(x_vector[i+1], NAN, NAN));
-
-		if (d > 0) {
-			p[0] = x_vector[i - 1];
-			p[1] = x_vector[i + 1];
-			return p;
+			x_vector[i + 1].fit_fun(ff); // Obliczenie y ostatniego elementu wektora
+		} while (x_vector[i].y(0) >= x_vector[i+1].y(0));
+		if (d > 0)
+		{
+			p[0] = x_vector[i - 1].x(0);
+			p[1] = x_vector[i + 1].x(0);
 		}
-
-		p[0] = x_vector[i + 1];
-		p[1] = x_vector[i - 1];
+		else {
+			p[0] = x_vector[i + 1].x(0);
+			p[1] = x_vector[i - 1].x(0);
+		}
 		return p;
 	}
 	catch (string ex_info)
@@ -92,39 +143,80 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		solution Xopt;
 		Xopt.clear_calls;
 		//Tu wpisz kod funkcji
+		//Wersja bez f_calls
+		//vector<double> ciag_fib;
+		//ciag_fib.push_back(1.0);
+		//ciag_fib.push_back(1.0);
+
+		//while (ciag_fib.back() <= (b - a) / epsilon) {
+		//	ciag_fib.push_back(ciag_fib[ciag_fib.size() - 1] + ciag_fib[ciag_fib.size() - 2]);
+		//}
+
+		//int k = 1;
+		//while (true) {
+		//	if (ciag_fib[k] > (b - a) / epsilon)
+		//		break;
+		//	k++;
+		//}
+
+		//double c = b - (ciag_fib[k - 1] / ciag_fib[k]) * (b - a);
+		//double d = a + b - c;
+
+		//for (int i = 0; i < k - 3; i++) {
+		//	if (ff(c, NAN, NAN)(0) < ff(d, NAN, NAN)(0)) {
+		//		a = a; //Niepotrzebne ale spojne z pseudokodem
+		//		b = d;
+		//	}
+		//	else {
+		//		b = b; //Niepotrzebne ale spojne z pseudokodem
+		//		a = c;
+		//	}
+		//	c = b - (ciag_fib[k - i - 2] / ciag_fib[k - i - 1]) * (b - a);
+		//	d = a + b - c;
+		//}
+
+		//Xopt.x = c; // Nie wiem czy uzywac tego konstruktora czy po prostu dac "= c"
+		//Xopt.y = ff(c, NAN, NAN)(0);
+		//return Xopt;
+
+		//Wersja z f_calls
+		solution A(a), B(b), C, D;
 		vector<double> ciag_fib;
 		ciag_fib.push_back(1.0);
 		ciag_fib.push_back(1.0);
 
-		while (ciag_fib.back() <= (b - a) / epsilon) {
+		while (ciag_fib.back() <= (B.x(0) - A.x(0)) / epsilon) {
 			ciag_fib.push_back(ciag_fib[ciag_fib.size() - 1] + ciag_fib[ciag_fib.size() - 2]);
 		}
 
 		int k = 1;
 		while (true) {
-			if (ciag_fib[k] > (b - a) / epsilon)
+			if (ciag_fib[k] > (B.x(0) - A.x(0)) / epsilon)
 				break;
 			k++;
 		}
 
-		double c = b - (ciag_fib[k - 1] / ciag_fib[k]) * (b - a);
-		double d = a + b - c;
+		C.x(0) = B.x(0) - (ciag_fib[k - 1] / ciag_fib[k]) * (B.x(0) - A.x(0));
+		D.x(0) = A.x(0) + B.x(0) - C.x(0);
+		C.fit_fun(ff);
+		D.fit_fun(ff);
 
 		for (int i = 0; i < k - 3; i++) {
-			if (ff(c, NAN, NAN)(0) < ff(d, NAN, NAN)(0)) {
-				a = a; //Niepotrzebne ale spojne z pseudokodem
-				b = d;
+			if (C.y(0) < D.y(0)) {
+				B.x = D.x;
 			}
 			else {
-				b = b; //Niepotrzebne ale spojne z pseudokodem
-				a = c;
+				A.x = C.x;
 			}
-			c = b - (ciag_fib[k - i - 2] / ciag_fib[k - i - 1]) * (b - a);
-			d = a + b - c;
+			C.x(0) = B.x(0) - (ciag_fib[k - i - 2] / ciag_fib[k - i - 1]) * (B.x(0) - A.x(0));
+			D.x(0) = A.x(0) + B.x(0) - C.x(0);
+			C.fit_fun(ff);
+			D.fit_fun(ff);
 		}
 
-		Xopt.x = c; // Nie wiem czy uzywac tego konstruktora czy po prostu dac "= c"
-		Xopt.y = ff(c, NAN, NAN)(0);
+		Xopt.x = C.x(0);
+		Xopt.y = C.y(0);
+		Xopt.flag = 1;
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -140,6 +232,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		Xopt.clear_calls;
 		solution A(a), B(b), C, D, D0;
 		C.x = (a + b) / 2;
 		A.fit_fun(ff);
@@ -147,7 +240,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		C.fit_fun(ff);
 		double l, m;
 		int i = 0;
-		while(true) {
+		while (true) {
 			l = A.y(0) * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y(0) * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y(0) * (pow(A.x(0), 2) - pow(B.x(0), 2));
 			m = (A.y(0) * (B.x(0) - C.x(0))) + (B.y(0) * (C.x(0) - A.x(0))) + (C.y(0) * (A.x(0) - B.x(0)));
 			if (m <= 0) {
@@ -195,7 +288,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			{
 				break;
 			}
-		} 
+		}
 
 		Xopt.x = D.x;
 		Xopt.y = D.y;

@@ -44,13 +44,13 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2) {
     double a = 0.98;            // wsp. lepkości
     double b = 0.63;            // wsp. zwężenia strumienia
     double g = 9.81;            // przysp. ziemskie
-    double PA = 0.5;              // pole pow. zbiornika A
+    double PA = 0.5;            // pole pow. zbiornika A
     double PB = 1;              // pole pow. zbiornika B
     double DB = 0.00365665;     // wielkość otworu w zbiorniku B
     double Fin = 0.01;          // ilość wody wpływającej do B (z rury)
     double Tin = 20;            // temp. wody wpływającej
     double TA = 90.0;           // temp. wody w zbiorniku A
-    double DA = 0.005;          // wielkość otworu w zbiorniku A (parametr z ud2)
+    double DA = ud1(0);         // wielkość otworu w zbiorniku A (parametr z ud2)
 
     // Stan w danym momencie, podany przez wektor Y
     double VA = Y(0);           // objętość w zbiorniku A
@@ -67,4 +67,19 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2) {
     dY(2) = FAout / VB * (TA - TB) + Fin / VB * (Tin - TB); // TB' (zmiana temperatury w B)
 
     return dY;
+}
+
+matrix ff2T(matrix x, matrix ud1, matrix ud2) {
+	matrix y;
+	matrix Y0 = matrix(3, new double[3] {5, 1, 20});
+	matrix* Y = solve_ode(df1, 0, 1, 2000, Y0, x);
+	int n = get_len(Y[0]);
+	double max = Y[1](0, 2);
+	for (int i = 0; i < n; i++) {
+		if (max < Y[1](i, 2)) {
+			max = Y[1](i, 2);
+		}
+	}
+	y = abs(max - 50);
+	return y[0];
 }
