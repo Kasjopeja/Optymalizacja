@@ -90,14 +90,14 @@ void lab1()
 	//do zbiornikow
 	double* res = new double[2] { 0, 0 };
 	double da = 0.005;
-	double delta_da = 0.005;
+	double delta_da = 0.002;
 	double tmax = 0;
 	double alpha = 1.5;
 	double epsilon = 0.0001;
 	double gamma = 0.000001;
 	int nmax = 1000;
 
-	expansion(ff2T, da, delta_da, alpha, nmax);
+	res = expansion(ff2T, da, delta_da, alpha, nmax);
 	solution wynik;
 	wynik = fib(ff2T, res[0], res[1], epsilon);
 	//wynik = lag(ff2T, res[0], res[1], epsilon, gamma, nmax);
