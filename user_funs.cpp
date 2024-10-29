@@ -83,3 +83,13 @@ matrix ff2T(matrix x, matrix ud1, matrix ud2) {
 	y = abs(max - 50);
 	return y[0];
 }
+
+
+matrix ff3T(matrix x, matrix ud1, matrix ud2) {
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double result = pow(x1, 2) + pow(x2, 2) - cos(2.5 * 3.14 * x1) - cos(2.5 * 3.14 * x2) + 2;
+
+	return matrix(1, 1, result);
+}
