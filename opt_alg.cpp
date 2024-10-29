@@ -83,6 +83,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 
 		//Wersja pod f_calls
 
+		solution::clear_calls();
 		solution X0(x0);
 		solution X1(x0 + d);
 		//solution X2;
@@ -141,7 +142,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-		Xopt.clear_calls;
+		Xopt.clear_calls();
 		//Tu wpisz kod funkcji
 		//Wersja bez f_calls
 		//vector<double> ciag_fib;
@@ -232,7 +233,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
-		Xopt.clear_calls;
+		Xopt.clear_calls();
 		solution A(a), B(b), C, D, D0;
 		C.x = (a + b) / 2;
 		A.fit_fun(ff);

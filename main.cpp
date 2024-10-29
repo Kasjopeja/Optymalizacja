@@ -68,36 +68,40 @@ void lab0()
 
 void lab1()
 {
+	std::ofstream Sout("symulacja_lab1.csv");
+	
+	//zadanie teoretyczne
+
 	double* res = new double[2] { 0, 0 };
-	double x0 = -100;
-	double d = 5;
-	double alpha = 2.1;
+	double x0 = -100, d = 5, alpha = 2.1;
 	int Nmax = 10000;
 
-	std::ofstream Sout("results.csv");
-	Sout << "a,b,f_calls\n"; 
+	//double a = 50, b = 70;
+	double epsilon = 0.0001;
+	double gamma = 0.000001;
+	solution wynik;
 
 	for (int i = 0; i < 100; i++)
 	{
 		res = expansion(ff1T, x0, d, alpha, Nmax);
-		cout << res[0] << endl << res[1] << endl << solution::f_calls << endl;
-		Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
+		cout << res[0] << endl << res[1] << endl << solution::f_calls << endl << endl;
+		//Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
+
+		wynik = fib(ff1T, res[0], res[1], epsilon);
+		//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
+		cout << wynik << endl;
+
+		wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+		//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
+		cout << wynik << endl;
+
 		x0 = x0 + 2;
 	}
 
 
-	////double a = 50;
-	////double b = 70;
-	//double epsilon = 0.0001;
-	//solution wynik;
-	//wynik = fib(ff1T, res[0], res[1], epsilon);
-	//cout << wynik << endl;
 
-	//double gamma = 0.000001;
-	//wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
-	//cout << wynik << endl;
+	//zadanie praktyczne
 
-	//do zbiornikow
 	//double* res = new double[2] { 0, 0 };
 	//double da = 0.005;
 	//double delta_da = 0.002;
