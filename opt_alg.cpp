@@ -119,7 +119,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
 			x_vector[i + 1].fit_fun(ff); // Obliczenie y ostatniego elementu wektora
-		} while (x_vector[i].y(0) >= x_vector[i+1].y(0));
+		} while (x_vector[i].y(0) >= x_vector[i + 1].y(0));
 		if (d > 0)
 		{
 			p[0] = x_vector[i - 1].x(0);
@@ -308,7 +308,38 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		Xopt.clear_calls();
+		solution XB, XB_temp, X;
+		do {
+			XB.x = x0;
+			XB.fit_fun(ff);
+			X = HJ_trial(ff, XB, s).x;
+			if (X.y < XB.y) {
+				do {
+					XB_temp = XB;
+					XB = X;
+					X.x = 2 * XB.x - XB_temp.x;
+					X.fit_fun(ff);
+					X = HJ_trial(ff, X, s);
+					if (X.f_calls > Nmax) {
+						Xopt.flag = 0;
+						return Xopt;
+					}
+				} while (X.y < XB.y);
+				X = XB;
+			}
+			else {
+				s = alpha * s;
+			}
+			if (X.f_calls > Nmax) {
+				Xopt.flag = 0;
+				return Xopt;
+			}
+		} while (s > epsilon);
 
+		Xopt.x = XB.x;
+		Xopt.y = XB.y;
+		Xopt.flag = 1;
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -321,8 +352,27 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 {
 	try
 	{
-		//Tu wpisz kod funkcji
-
+		//Tu wpisz kod 
+		solution X;
+		int n = get_len(XB.x);
+		matrix E(n, n);
+		for (int j = 1; j < n; j++) {
+			E(j, j) = 1.0;
+		}
+		for (int j = 1; j < n; j++) {
+			X.x = XB.x + (s * E[j]);
+			X.fit_fun(ff);
+			if (X.y < XB.y) {
+				XB = X;
+			}
+			else {
+				X.x = XB.x - (s * E[j]);
+				X.fit_fun(ff);
+				if (X.y < XB.y) {
+					XB = X;
+				}
+			}
+		}
 		return XB;
 	}
 	catch (string ex_info)
@@ -337,6 +387,24 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		solution::clear_calls();
+		int i = 0;
+		int n = get_len(x0);
+		matrix d(n, n);
+		for (int j = 1; j < n; j++) {
+			d(j, j) = 1.0;
+		}
+		matrix lamda(n, 1), p(n, 1), s(s0);
+		solution XB, X_temp;
+		XB.x = x0;
+		XB.fit_fun(ff);
+		while (true) {
+			for (int j = 1; j < n; j++) {
+				X_temp.x = XB.x + (s(i) * d[i]);
+				X_temp.fit_fun(ff);
+				if (X_temp.y < )
+			}
+		}
 
 		return Xopt;
 	}
