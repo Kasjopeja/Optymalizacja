@@ -68,13 +68,23 @@ void lab0()
 
 void lab1()
 {
-	//double* res = new double[2] { 0, 0 };
-	//double x0 = 50;
-	//double d = 5;
-	//double alpha = 1.5;
-	//int Nmax = 10000;
-	//res = expansion(ff1T, x0, d, alpha, Nmax);
-	//cout << res[0] << endl << res[1] << endl;
+	double* res = new double[2] { 0, 0 };
+	double x0 = -100;
+	double d = 5;
+	double alpha = 2.1;
+	int Nmax = 10000;
+
+	std::ofstream Sout("results.csv");
+	Sout << "a,b,f_calls\n"; 
+
+	for (int i = 0; i < 100; i++)
+	{
+		res = expansion(ff1T, x0, d, alpha, Nmax);
+		cout << res[0] << endl << res[1] << endl << solution::f_calls << endl;
+		Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
+		x0 = x0 + 2;
+	}
+
 
 	////double a = 50;
 	////double b = 70;
@@ -88,20 +98,20 @@ void lab1()
 	//cout << wynik << endl;
 
 	//do zbiornikow
-	double* res = new double[2] { 0, 0 };
-	double da = 0.005;
-	double delta_da = 0.002;
-	double tmax = 0;
-	double alpha = 1.5;
-	double epsilon = 0.0001;
-	double gamma = 0.000001;
-	int nmax = 1000;
+	//double* res = new double[2] { 0, 0 };
+	//double da = 0.005;
+	//double delta_da = 0.002;
+	//double tmax = 0;
+	//double alpha = 1.5;
+	//double epsilon = 0.0001;
+	//double gamma = 0.000001;
+	//int nmax = 1000;
 
-	res = expansion(ff2T, da, delta_da, alpha, nmax);
-	solution wynik;
-	//wynik = fib(ff2T, res[0], res[1], epsilon); 
-	wynik = lag(ff2T, res[0], res[1], epsilon, gamma, nmax);
-	cout << wynik;
+	//res = expansion(ff2T, da, delta_da, alpha, nmax);
+	//solution wynik;
+	////wynik = fib(ff2T, res[0], res[1], epsilon); 
+	//wynik = lag(ff2T, res[0], res[1], epsilon, gamma, nmax);
+	//cout << wynik;
 }
 
 void lab2()
