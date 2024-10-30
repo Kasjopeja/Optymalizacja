@@ -42,6 +42,7 @@ void lab0()
 	solution opt;
 	a(0) = -1;
 	a(1) = 2;
+
 	opt = MC(ff0T, 2, lb, ub, epsilon, Nmax, a);
 	cout << opt << endl << endl;
 	solution::clear_calls();
@@ -52,6 +53,7 @@ void lab0()
 	lb = 0;
 	ub = 5;
 	double teta_opt = 1;
+
 	opt = MC(ff0R, 1, lb, ub, epsilon, Nmax, teta_opt);
 	cout << opt << endl << endl;
 	solution::clear_calls();
@@ -73,7 +75,7 @@ void lab1()
 	//zadanie teoretyczne
 
 	double* res = new double[2] { 0, 0 };
-	double x0 = -100, d = 5, alpha = 2.1;
+	double x0 = 50, d = 5, alpha = 1.5;
 	int Nmax = 10000;
 
 	//double a = 50, b = 70;
@@ -81,13 +83,13 @@ void lab1()
 	double gamma = 0.000001;
 	solution wynik;
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		res = expansion(ff1T, x0, d, alpha, Nmax);
 		cout << res[0] << endl << res[1] << endl << solution::f_calls << endl << endl;
 		//Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
 
-		wynik = fib(ff1T, -100, 100, epsilon);
+		wynik = fib(ff1T, res[0], res[1], epsilon);
 		//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
 		cout << wynik << endl;
 
@@ -97,6 +99,8 @@ void lab1()
 
 		x0 = x0 + 2;
 	}
+
+
 
 	//zadanie praktyczne
 
@@ -115,6 +119,8 @@ void lab1()
 	cout << "Metoda Lagrangea: " << endl;
 	cout << "Optymalna wielosc otworu D_A: " << wynik.x << "\nMaksymalna temperatura wody w zbiorniku: " << wynik.y + 50 << "|" << wynik.y << "\nLiczna wywolan fukcji: " << wynik.f_calls << "\nExit flag: " << wynik.flag << endl;
 	//cout << wynik;
+
+
 
 	//symlacja 
 
