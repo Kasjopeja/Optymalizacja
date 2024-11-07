@@ -400,7 +400,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 		solution Xopt;
 		//Tu wpisz kod funkcji
 		solution::clear_calls();
-		int i = 0;
+		//int i = 0;
 		int n = get_len(x0);
 		matrix d(n, n);
 		for (int j = 1; j < n; j++) {
@@ -410,15 +410,71 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 		solution XB, X_temp;
 		XB.x = x0;
 		XB.fit_fun(ff);
+
 		while (true) {
+
+			//zacznijmy szukaæ rozwi¹zania zgodnie z zadan¹ baz¹ 
 			for (int j = 1; j < n; j++) {
-				X_temp.x = XB.x + (s(i) * d[i]);
+				X_temp.x = XB.x + (s(j) * d[j]);
 				X_temp.fit_fun(ff);
-				//if (X_temp.y < )
+				if (X_temp.y(0) < XB.y(0)) {
+					XB = X_temp;
+					lamda(j) += s(j);
+					s(j) *= alpha;
+				}
+				else {
+					p(j) = p(j) + 1;
+					s(j) *= -beta;
+				}
+			}
+
+			//czy któryœ z kroków pogorszy³ sytuacje?
+			bool change = true;
+			for (int j = 0; j < n; j++) {
+				if (p(j) == 0 || lamda(j) == 0)
+				{
+					change = false;
+					break;
+				}
+
+			}
+
+			//zmiana bazy je¿eli jest to konieczne
+			if (change)
+			{
+				matrix Q(n, n), v(n, 1);
+				for (int i = 0; i < n; ++i)
+					for (int j = 0; j <= i; ++j)
+						Q(i, j) = lamda(i);
+
+				Q = d * Q;
+				v = Q[0] / norm(Q[0]);
+				d.set_col(v, 0);
+				for (int i = 1; i < n; ++i)
+				{
+					matrix temp(n, 1);
+					for (int j = 0; j < i; ++j)
+						temp = temp + (trans(Q[i]) * d[j]) * d[j];
+					v = Q[i] - temp;
+					d.set_col(v, i);
+				}
+				s = s0;
+				lamda = matrix(n, 1);
+				p = matrix(n, 1);
+			}
+
+			//czy wynik jest wystarczaj¹co dok³adny?
+			double max_s = abs(s(0));
+			for (int i = 1; i < n; ++i) {
+				if (max_s < abs(s(i))) {
+					max_s = abs(s(i));
+				}
+			}
+			if (max_s < epsilon || solution::f_calls > Nmax) {
+				return Xopt;
 			}
 		}
 
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
