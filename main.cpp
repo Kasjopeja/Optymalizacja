@@ -173,10 +173,10 @@ void lab2()
 	solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
 	cout << hooke;
 
-	//matrix Step = matrix(2, new double[2]{ 0.001, 0.001 });
-	//double beta = 0.1;
-	//solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
-	//cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl;
+	matrix Step = matrix(2, new double[2]{ 0.001, 0.001 });
+	double beta = 0.1;
+	solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
+	//cout << rosen;
 }
 
 void lab3()

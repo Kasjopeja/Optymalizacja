@@ -471,6 +471,8 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				}
 			}
 			if (max_s < epsilon || solution::f_calls > Nmax) {
+				Xopt = XB;
+				Xopt.flag = 1;
 				return Xopt;
 			}
 		}
