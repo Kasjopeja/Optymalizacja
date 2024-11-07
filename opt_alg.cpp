@@ -325,7 +325,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 		do {
 			XB.x = X.x;
 			XB.fit_fun(ff);
-			X = HJ_trial(ff, XB, s).x;
+			X = HJ_trial(ff, XB, s);
 			if (X.y < XB.y) {
 				do {
 					XB_temp = XB;
