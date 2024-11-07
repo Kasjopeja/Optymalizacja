@@ -70,35 +70,35 @@ void lab0()
 
 void lab1()
 {
-	std::ofstream Sout("symulacja_lab1.csv");
-	
-	//zadanie teoretyczne
+	//std::ofstream Sout("symulacja_lab1.csv");
+	//
+	////zadanie teoretyczne
 
-	double* res = new double[2] { 0, 0 };
-	double x0 = 50, d = 5, alpha = 1.5;
-	int Nmax = 10000;
+	//double* res = new double[2] { 0, 0 };
+	//double x0 = 50, d = 5, alpha = 1.5;
+	//int Nmax = 10000;
 
-	//double a = 50, b = 70;
-	double epsilon = 0.0001;
-	double gamma = 0.000001;
-	solution wynik;
+	////double a = 50, b = 70;
+	//double epsilon = 0.0001;
+	//double gamma = 0.000001;
+	//solution wynik;
 
-	for (int i = 0; i < 1; i++)
-	{
-		res = expansion(ff1T, x0, d, alpha, Nmax);
-		cout << res[0] << endl << res[1] << endl << solution::f_calls << endl << endl;
-		//Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
+	//for (int i = 0; i < 1; i++)
+	//{
+	//	res = expansion(ff1T, x0, d, alpha, Nmax);
+	//	cout << res[0] << endl << res[1] << endl << solution::f_calls << endl << endl;
+	//	//Sout << "x" << res[0] << ";" << "x" << res[1] << ";" << "x" << solution::f_calls << "\n";
 
-		wynik = fib(ff1T, res[0], res[1], epsilon);
-		//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
-		cout << wynik << endl;
+	//	wynik = fib(ff1T, res[0], res[1], epsilon);
+	//	//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
+	//	cout << wynik << endl;
 
-		wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
-		//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
-		cout << wynik << endl;
+	//	wynik = lag(ff1T, res[0], res[1], epsilon, gamma, Nmax);
+	//	//Sout << "x" << wynik.x << "x" << wynik.y << "x" << wynik.f_calls << "\n";
+	//	cout << wynik << endl;
 
-		x0 = x0 + 2;
-	}
+	//	x0 = x0 + 2;
+	//}
 
 
 
@@ -164,7 +164,19 @@ void lab1()
 
 void lab2()
 {
+	// zadanie teoretyczne
+	matrix X = matrix(2, new double[2]{ 0.4, 0.4 });
+	double step = 0.01;
+	double alpha = 0.8;
+	double epsilon = 0.0001;
+	int Nmax = 1000;
+	solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
+	cout << hooke;
 
+	//matrix Step = matrix(2, new double[2]{ 0.001, 0.001 });
+	//double beta = 0.1;
+	//solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
+	//cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl;
 }
 
 void lab3()

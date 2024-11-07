@@ -321,9 +321,9 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 		solution Xopt;
 		//Tu wpisz kod funkcji
 		Xopt.clear_calls();
-		solution XB, XB_temp, X;
+		solution XB, XB_temp, X(x0);
 		do {
-			XB.x = x0;
+			XB.x = X.x;
 			XB.fit_fun(ff);
 			X = HJ_trial(ff, XB, s).x;
 			if (X.y < XB.y) {
@@ -368,10 +368,10 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 		solution X;
 		int n = get_len(XB.x);
 		matrix E(n, n);
-		for (int j = 1; j < n; j++) {
+		for (int j = 0; j < n; j++) {
 			E(j, j) = 1.0;
 		}
-		for (int j = 1; j < n; j++) {
+		for (int j = 0; j < n; j++) {
 			X.x = XB.x + (s * E[j]);
 			X.fit_fun(ff);
 			if (X.y < XB.y) {
