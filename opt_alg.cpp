@@ -397,13 +397,12 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 {
 	try
 	{
-		solution Xopt;
 		//Tu wpisz kod funkcji
 		solution::clear_calls();
 		//int i = 0;
 		int n = get_len(x0);
 		matrix d(n, n);
-		for (int j = 1; j < n; j++) {
+		for (int j = 0; j < n; j++) {
 			d(j, j) = 1.0;
 		}
 		matrix lamda(n, 1), p(n, 1), s(s0);
@@ -414,7 +413,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 		while (true) {
 
 			//zacznijmy szukaæ rozwi¹zania zgodnie z zadan¹ baz¹ 
-			for (int j = 1; j < n; j++) {
+			for (int j = 0; j < n; j++) {
 				X_temp.x = XB.x + (s(j) * d[j]);
 				X_temp.fit_fun(ff);
 				if (X_temp.y(0) < XB.y(0)) {
@@ -471,11 +470,10 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				}
 			}
 			if (max_s < epsilon || solution::f_calls > Nmax) {
-				Xopt = XB;
-				Xopt.flag = 1;
-				return Xopt;
+				return XB;
 			}
 		}
+		
 
 	}
 	catch (string ex_info)
