@@ -178,7 +178,7 @@ void lab2()
 	//solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
 	//cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl << rosen.f_calls << endl;
 
-	matrix x(2, 1, 5);
+	matrix x(2, 1, 5); // macierz 2x1 wypelniona wartoscia 5
 	cout << ff3R(x);
 
 
