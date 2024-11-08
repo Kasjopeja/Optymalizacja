@@ -116,7 +116,7 @@ matrix df3(double t, matrix Y, matrix ud1, matrix ud2) {
 
 matrix ff3R(matrix x, matrix ud1, matrix ud2) {
 	matrix y = 0;
-	matrix Y0(2, 1), Yref(2, new double[2] {3.14159265358979323846, 0});
+	matrix Y0(2, 1), Yref(2, new double[2] {3.14, 0});
 	matrix* Y = solve_ode(df3, 0, 0.1, 100, Y0, Yref, x);
 	int n = get_len(Y[0]);
 	for (int i = 0; i < n; i++) {
