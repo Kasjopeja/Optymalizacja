@@ -164,19 +164,24 @@ void lab1()
 
 void lab2()
 {
-	// zadanie teoretyczne
-	matrix X = matrix(2, new double[2]{ 0, 0});
-	double step = 0.01;
-	double alpha = 1.8;
-	double epsilon = 0.0001;
-	int Nmax = 1000;
-	//solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
-	//cout << hooke;
+	//// zadanie teoretyczne
+	//matrix X = matrix(2, new double[2]{ 0.5, 0.5});
+	//double step = 0.01;
+	//double alpha = 1.8;
+	//double epsilon = 0.0001;
+	//int Nmax = 1000;
+	////solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
+	////cout << hooke;
 
-	matrix Step = matrix(2, new double[2]{ 0.01, 0.01});
-	double beta = 0.1;
-	solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
-	cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl << rosen.f_calls << endl;
+	//matrix Step = matrix(2, new double[2]{ 0.01, 0.01});
+	//double beta = 0.1;
+	//solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
+	//cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl << rosen.f_calls << endl;
+
+	matrix x(2, 1, 5);
+	cout << ff3R(x);
+
+
 }
 
 void lab3()
