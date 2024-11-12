@@ -164,6 +164,7 @@ void lab1()
 
 void lab2()
 {
+
 	srand(time(NULL));
 	std::ofstream Sout("symulacja_lab2.csv");
 	// zadanie teoretyczne
