@@ -164,19 +164,33 @@ void lab1()
 
 void lab2()
 {
+	srand(time(NULL));
+	std::ofstream Sout("symulacja_lab2.csv");
 	// zadanie teoretyczne
-	matrix X = matrix(2, new double[2]{ 0, 0});
-	double step = 0.01;
-	double alpha = 1.8;
-	double epsilon = 0.0001;
-	int Nmax = 1000;
-	//solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
-	//cout << hooke;
 
-	matrix Step = matrix(2, new double[2]{ 0.01, 0.01});
-	double beta = 0.1;
-	solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
-	cout << rosen.x(0) << endl << rosen.x(1) << endl << rosen.y << endl << rosen.f_calls << endl;
+	matrix X;
+	double step = 0.01, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
+	double a, b;
+	int Nmax = 1000;
+
+	for (int i = 0; i < 100; i++)
+	{
+		a = ((rand() % 200) / 100.0) - 1;
+		b = ((rand() % 200) / 100.0) - 1;
+		alpha = 0.8;
+		X = matrix(2, new double[2] {a, b});
+		solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
+		Sout << "x" << a << ";" << "x" << b << ";" << "x" << hooke.x(0) << ";" << "x" << hooke.x(1) << ";" << "x" << hooke.y << ";" << "x" << solution::f_calls << ";";
+		cout << hooke;
+
+		
+		alpha = 1.8;
+		matrix Step = matrix(2, new double[2] { step, step});
+		solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
+		Sout << "x" << rosen.x(0) << ";" << "x" << rosen.x(1) << ";" << "x" << rosen.y << ";" << "x" << solution::f_calls << "\n";
+		cout << rosen;
+	}
+
 }
 
 void lab3()
