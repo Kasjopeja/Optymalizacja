@@ -9,6 +9,7 @@ Data ostatniej modyfikacji: 19.09.2023
 *********************************************/
 
 #include"opt_alg.h"
+#include"user_funs.h"
 
 void lab0();
 void lab1();
@@ -177,8 +178,6 @@ void lab2()
 
 	// zadanie teoretyczne
 
-	/*
-
 	for (int i = 0; i < 100; i++)
 	{
 		a = ((rand() % 200) / 100.0) - 1;
@@ -196,24 +195,62 @@ void lab2()
 		//Sout << "x" << rosen.x(0) << ";" << "x" << rosen.x(1) << ";" << "x" << rosen.y << ";" << "x" << solution::f_calls << "\n";
 		//cout << rosen;
 	}
-
-	*/
+	
 
 	//problem rzeczywisty
 
 	//sprawdzenie poprawnosci
 	matrix x(2, 1, 5); // macierz 2x1 wypelniona wartoscia 5
 	cout << ff3R(x);
-
+	
 	X = matrix(2, new double[2] {5, 5});
 	solution wynikHJ = HJ(ff3R, X, step, alpha, epsilon, Nmax);
-	cout << wynikHJ;
+	//cout << wynikHJ;
 
 	alpha = 1.8;
 	matrix Step = matrix(2, new double[2] { step, step});
 	solution wynikR = Rosen(ff3R, X, Step, alpha, beta, epsilon, Nmax);
-	cout << wynikR;
+	//cout << wynikR;
 
+	//symulacja 
+
+	double t0 = 0.0;
+	double tend = 100.0;
+	double dt = 0.1;
+
+	// Initial conditions for the state vector Y
+	matrix Y0(2, 1); 
+	Y0(0) = 0.0;     
+	Y0(1) = 0.0;     
+
+	// Reference values for the desired angle and angular velocity
+	matrix ud1(2, 1);
+	ud1(0) = 3.14;   
+	ud1(1) = 0.0;    
+
+	// Gain parameters, k1 and k2, within the range [0, 10]
+	matrix ud2(2, 1);
+	//ud2(0) = wynikHJ.x(0);     
+	ud2(0) = wynikR.x(0);     
+	//ud2(1) = wynikHJ.x(1);     
+	ud2(1) = wynikR.x(1);     
+
+	matrix* result = solve_ode(df3, t0, dt, tend, Y0, ud1, ud2);
+
+	int n = get_len(result[0]);
+	std::cout << "Time\tAngle\tAngular Velocity" << std::endl;
+	for (int i = 0; i < n; i++) {
+		std::cout << result[0](i) << "\t"      
+			<< result[1](i, 0) << "\t"  
+			<< result[1](i, 1) << std::endl; 
+	}
+
+	std::ofstream file("symulacja_lab2.csv");
+	file << "Czas;Kat;Predkosc katowa\n";
+	for (int i = 0; i < n; ++i) {
+		file << result[0](i) << "x;" << result[1](i, 0) << "x;" << result[1](i, 1) << "x\n";
+	}
+	file.close();
 
 }
 
