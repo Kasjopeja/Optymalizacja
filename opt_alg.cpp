@@ -503,6 +503,8 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 		solution Xopt;
 		//Tu wpisz kod funkcji
 
+
+
 		return Xopt;
 	}
 	catch (string ex_info)

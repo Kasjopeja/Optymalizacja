@@ -125,3 +125,51 @@ matrix ff3R(matrix x, matrix ud1, matrix ud2) {
 	y = y * 0.1;
 	return y;
 }
+
+
+matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+	//ud1 - wspolczynnik a (?)
+	//ud2 - wspolczynnik kary c
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double licznik = sin(3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2))));
+	double mianownik = 3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2)));
+
+	double result = licznik / mianownik;
+
+	matrix y(1, 1, result);
+
+	if (-x(0) + 1 > 0) {
+		y = y + ud2 * pow(-x(0) + 1, 2);
+	}
+	if (-x(1) + 1 > 0) {
+		y = y + ud2 * pow(-x(1) + 1, 2);
+	}
+	if (norm(x) - ud1 > 0) {
+		y = y + ud2 * pow(norm(x) - ud1, 2);
+	}
+
+	return y;
+}
+
+matrix ff4Tb(matrix x, matrix ud1, matrix ud2) {
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double licznik = sin(3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2))));
+	double mianownik = 3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2)));
+
+	double result = licznik / mianownik;
+
+	matrix y(1, 1, result);
+
+	if (-x(0) + 1 > 0) {
+		y = 1000000000;
+	}
+	else {
+		y = y - ud2 / (-x(0) + 1);
+	}
+
+	return y;
+}
