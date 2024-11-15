@@ -486,14 +486,16 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 {
 	try {
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		Xopt.clear_calls();
+		solution X(x0);
+		int k = 0;
 
 		while (true) {
 			X.fit_fun(ff, ud1, ud2); // Obliczamy wartość funkcji
 			Xopt = X;
 
 			// Minimalizujemy funkcję przystosowaną (z karą)
-			solution Y = HJ(ff, X.x, 1.0, 0.5, epsilon, Nmax, ud1, c * ud2); //Dlaczego tu HJ??? nie mam pojecia
+			solution Y = HJ(ff, X.x, 1.0, 0.5, epsilon, Nmax, ud1, c * ud2); //Nie rozumiem czemu tu uzywa HJ
 			X = Y;
 
 			if (norm(X.x - Xopt.x) < epsilon || X.f_calls > Nmax) {
@@ -508,19 +510,85 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 
 		return Xopt;
 	}
-	catch (string ex_info)
-	{
+	catch (string ex_info) {
 		throw ("solution pen(...):\n" + ex_info);
 	}
 }
 
+
 solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
-	try
-	{
+	try {
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		Xopt.clear_calls();
 
+		int n = get_len(x0);
+		int N = n + 1;
+		vector<solution> simplex(N);
+
+		// Tworzymy początkowy sympleks
+		simplex[0] = solution(x0);
+		simplex[0].fit_fun(ff, ud1, ud2);
+
+		for (int i = 1; i < N; ++i) {
+			matrix x_temp = x0;
+			x_temp(i - 1) += s;
+			simplex[i] = solution(x_temp);
+			simplex[i].fit_fun(ff, ud1, ud2);
+		}
+
+		while (true) {
+			// Znajdź wierzchołki minimalne i maksymalne
+			int p_min = 0, p_max = 0;
+			for (int i = 1; i < N; ++i) {
+				if (simplex[i].y < simplex[p_min].y) p_min = i;
+				if (simplex[i].y > simplex[p_max].y) p_max = i;
+			}
+
+			// Oblicz środek masy sympleksu (z wyłączeniem p_max)
+			matrix centroid(n, 1);
+			for (int i = 0; i < N; ++i) {
+				if (i != p_max) {
+					centroid = centroid + simplex[i].x;
+				}
+			}
+			centroid = centroid / n;
+
+			// Odbicie
+			solution p_reflect = solution(centroid + alpha * (centroid - simplex[p_max].x));
+			p_reflect.fit_fun(ff, ud1, ud2);
+
+			if (p_reflect.y < simplex[p_min].y) {
+				// Ekspansja
+				solution p_expand = solution(centroid + gamma * (p_reflect.x - centroid));
+				p_expand.fit_fun(ff, ud1, ud2);
+				if (p_expand.y < p_reflect.y) {
+					simplex[p_max] = p_expand;
+				}
+				else {
+					simplex[p_max] = p_reflect;
+				}
+			}
+			else if (p_reflect.y >= simplex[p_min].y && p_reflect.y < simplex[p_max].y) {
+				simplex[p_max] = p_reflect;
+			}
+			else {
+				// Kontrakcja
+				solution p_contract = solution(centroid + beta * (simplex[p_max].x - centroid));
+				p_contract.fit_fun(ff, ud1, ud2);
+				if (p_contract.y < simplex[p_max].y) {
+					simplex[p_max] = p_contract;
+				}
+				else {
+					// Redukcja
+					for (int i = 0; i < N; ++i) {
+						if (i != p_min) {
+							simplex[i].x = simplex[p_min].x + delta * (simplex[i].x - simplex[p_min].x);
+							simplex[i].fit_fun(ff, ud1, ud2);
+						}
+					}
+				}
+			}
 
 			// Sprawdź kryterium zakończenia
 			double max_diff = 0.0;
@@ -542,6 +610,7 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 		throw ("solution sym_NM(...):\n" + ex_info);
 	}
 }
+
 
 
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
