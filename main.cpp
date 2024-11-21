@@ -112,13 +112,13 @@ void lab1()
 	double alpha = 1.5, epsilon = 0.0001, gamma = 0.000001;
 	int nmax = 1000;
 
-	res = expansion(ff2T, da, delta_da, alpha, nmax);
+	res = expansion(ff1R, da, delta_da, alpha, nmax);
 	solution wynik;
-	//wynik = fib(ff2T, res[0], res[1], epsilon); 
+	//wynik = fib(ff1R, res[0], res[1], epsilon); 
 	cout << "Metoda Fibonacciego: " << endl;
 	cout << "Optymalna wielosc otwou D_A: " << wynik.x << "\nMaksymalna temperatura wody w zbiorniku: " << wynik.y + 50 << "|" << wynik.y << "\nLiczna wywolan fukcji: " << wynik.f_calls << "\nExit flag: " << wynik.flag << endl;;
 	//cout << wynik;
-	wynik = lag(ff2T, res[0], res[1], epsilon, gamma, nmax);
+	wynik = lag(ff1R, res[0], res[1], epsilon, gamma, nmax);
 	cout << "Metoda Lagrangea: " << endl;
 	cout << "Optymalna wielosc otworu D_A: " << wynik.x << "\nMaksymalna temperatura wody w zbiorniku: " << wynik.y + 50 << "|" << wynik.y << "\nLiczna wywolan fukcji: " << wynik.f_calls << "\nExit flag: " << wynik.flag << endl;
 	//cout << wynik;
@@ -184,14 +184,14 @@ void lab2()
 		b = ((rand() % 200) / 100.0) - 1;
 		alpha = 0.8;
 		X = matrix(2, new double[2] {a, b});
-		solution hooke = HJ(ff3T, X, step, alpha, epsilon, Nmax);
+		solution hooke = HJ(ff2T, X, step, alpha, epsilon, Nmax);
 		//Sout << "x" << a << ";" << "x" << b << ";" << "x" << hooke.x(0) << ";" << "x" << hooke.x(1) << ";" << "x" << hooke.y << ";" << "x" << solution::f_calls << ";";
 		//cout << hooke;
 
 		
 		alpha = 1.8;
 		matrix Step = matrix(2, new double[2] { step, step});
-		solution rosen = Rosen(ff3T, X, Step, alpha, beta, epsilon, Nmax);
+		solution rosen = Rosen(ff2T, X, Step, alpha, beta, epsilon, Nmax);
 		//Sout << "x" << rosen.x(0) << ";" << "x" << rosen.x(1) << ";" << "x" << rosen.y << ";" << "x" << solution::f_calls << "\n";
 		//cout << rosen;
 	}
@@ -201,15 +201,15 @@ void lab2()
 
 	//sprawdzenie poprawnosci
 	matrix x(2, 1, 5); // macierz 2x1 wypelniona wartoscia 5
-	cout << ff3R(x);
+	cout << ff2R(x);
 	
 	X = matrix(2, new double[2] {5, 5});
-	solution wynikHJ = HJ(ff3R, X, step, alpha, epsilon, Nmax);
+	solution wynikHJ = HJ(ff2R, X, step, alpha, epsilon, Nmax);
 	//cout << wynikHJ;
 
 	alpha = 1.8;
 	matrix Step = matrix(2, new double[2] { step, step});
-	solution wynikR = Rosen(ff3R, X, Step, alpha, beta, epsilon, Nmax);
+	solution wynikR = Rosen(ff2R, X, Step, alpha, beta, epsilon, Nmax);
 	//cout << wynikR;
 
 	//symulacja 
@@ -235,7 +235,7 @@ void lab2()
 	//ud2(1) = wynikHJ.x(1);     
 	ud2(1) = wynikR.x(1);     
 
-	matrix* result = solve_ode(df3, t0, dt, tend, Y0, ud1, ud2);
+	matrix* result = solve_ode(df2, t0, dt, tend, Y0, ud1, ud2);
 
 	int n = get_len(result[0]);
 	std::cout << "Time\tAngle\tAngular Velocity" << std::endl;

@@ -485,32 +485,45 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
 	try {
-		solution Xopt;
-		Xopt.clear_calls();
-		solution X(x0);
-		int k = 0;
+		solution XB;
+		XB.x = x0;
+		XB.fit_fun(ff);
 
-		while (true) {
-			X.fit_fun(ff, ud1, ud2); // Obliczamy wartość funkcji
-			Xopt = X;
+		solution XT;
+		XT = XB;
 
-			// Minimalizujemy funkcję przystosowaną (z karą)
-			solution Y = HJ(ff, X.x, 1.0, 0.5, epsilon, Nmax, ud1, c * ud2); //Nie rozumiem czemu tu uzywa HJ
-			X = Y;
+		int i = 0;
 
-			if (norm(X.x - Xopt.x) < epsilon || X.f_calls > Nmax) {
-				Xopt = X;
-				Xopt.flag = 1;
-				break;
+		double s = 0.5; //dlugosc boku trójk¹ta
+		double alpha = 1.0; //Wspolczynnik odbicia
+		double beta = 0.5; //Wspolczynnik zwê¿enia
+		double gamma = 2.0; //Wspolczynnik ekspansji
+		double delta = 0.5; //Wspolczynnik redukcji
+
+		do
+		{
+			i++;
+			XT.x = XB.x;
+			XT = sym_NM(ff, XB.x, s, alpha, beta, gamma, delta, epsilon, Nmax, 5.0, c);
+			c *= dc;
+
+			if (solution::f_calls > Nmax)
+			{
+				XT.flag = 0;
+				throw std::string("Maximum amount of f_calls reached!");
 			}
 
-			c *= dc; // Aktualizujemy współczynnik kary
-			k++;
-		}
+			if (norm(XT.x - XB.x) < epsilon)
+				break;
 
-		return Xopt;
+			XB = XT;
+
+		} while (true);
+
+		return XT;
 	}
-	catch (string ex_info) {
+	catch (string ex_info)
+	{
 		throw ("solution pen(...):\n" + ex_info);
 	}
 }
@@ -518,95 +531,120 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 
 solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
-	try {
-		solution Xopt;
-		Xopt.clear_calls();
+
+	try
+	{
+		auto max = [&](std::vector<solution> sim, int i_min) -> double
+			{
+				double result = 0.0;
+				for (int i = 0; i < sim.size(); ++i)
+				{
+					double normal = norm(sim[i_min].x - sim[i].x);
+					if (result < normal)
+						result = normal;
+				}
+				return result;
+			};
 
 		int n = get_len(x0);
-		int N = n + 1;
-		vector<solution> simplex(N);
 
-		// Tworzymy początkowy sympleks
-		simplex[0] = solution(x0);
+		//Tworzenie bazy ortogonalnej
+		matrix d = matrix(n, n);
+		for (int i = 0; i < n; ++i)
+			d(i, i) = 1.0;
+
+		//Tworzenie simplexu i uzupelnianie go danymi
+		std::vector<solution> simplex;
+		simplex.resize(n + 1);
+		simplex[0].x = x0;
 		simplex[0].fit_fun(ff, ud1, ud2);
-
-		for (int i = 1; i < N; ++i) {
-			matrix x_temp = x0;
-			x_temp(i - 1) += s;
-			simplex[i] = solution(x_temp);
+		for (int i = 1; i < simplex.size(); ++i)
+		{
+			simplex[i].x = simplex[0].x + s * d[i - 1];
 			simplex[i].fit_fun(ff, ud1, ud2);
 		}
 
-		while (true) {
-			// Znajdź wierzchołki minimalne i maksymalne
-			int p_min = 0, p_max = 0;
-			for (int i = 1; i < N; ++i) {
-				if (simplex[i].y < simplex[p_min].y) p_min = i;
-				if (simplex[i].y > simplex[p_max].y) p_max = i;
+		//Indeks najmniejszej wartoœci wierzcholka simplexu
+		int i_min{};
+		//Indeks najwiekszej wartosci wierzcholka simplexu
+		int i_max{};
+
+		while (max(simplex, i_min) >= epsilon)
+		{
+			//Wyznaczanie maksymalnego i minimalnego indeksu
+			i_min = 0;
+			i_max = 0;
+			for (int i = 1; i < simplex.size(); ++i)
+			{
+				if (simplex[i].y < simplex[i_min].y)
+					i_min = i;
+				if (simplex[i].y > simplex[i_max].y)
+					i_max = i;
 			}
 
-			// Oblicz środek masy sympleksu (z wyłączeniem p_max)
-			matrix centroid(n, 1);
-			for (int i = 0; i < N; ++i) {
-				if (i != p_max) {
-					centroid = centroid + simplex[i].x;
-				}
+			//Wyznaczenie œrodka ciê¿koœci
+			matrix simplex_CoG{};
+			for (int i = 0; i < simplex.size(); ++i)
+			{
+				if (i == i_max)
+					continue;
+				simplex_CoG = simplex_CoG + simplex[i].x;
 			}
-			centroid = centroid / n;
+			simplex_CoG = simplex_CoG / simplex.size();
 
-			// Odbicie
-			solution p_reflect = solution(centroid + alpha * (centroid - simplex[p_max].x));
-			p_reflect.fit_fun(ff, ud1, ud2);
+			//Obliczanie wartoœci funkcji odbitego simplexu
+			solution simplex_reflected{};
+			simplex_reflected.x = simplex_CoG + alpha * (simplex_CoG - simplex[i_max].x);
+			simplex_reflected.fit_fun(ff, ud1, ud2);
 
-			if (p_reflect.y < simplex[p_min].y) {
-				// Ekspansja
-				solution p_expand = solution(centroid + gamma * (p_reflect.x - centroid));
-				p_expand.fit_fun(ff, ud1, ud2);
-				if (p_expand.y < p_reflect.y) {
-					simplex[p_max] = p_expand;
-				}
-				else {
-					simplex[p_max] = p_reflect;
-				}
+			if (simplex_reflected.y < simplex[i_min].y)
+			{
+				solution simplex_expansion{};
+				simplex_expansion.x = simplex_CoG + gamma * (simplex_reflected.x - simplex_CoG);
+				simplex_expansion.fit_fun(ff, ud1, ud2);
+				if (simplex_expansion.y < simplex_reflected.y)
+					simplex[i_max] = simplex_expansion;
+				else
+					simplex[i_max] = simplex_reflected;
 			}
-			else if (p_reflect.y >= simplex[p_min].y && p_reflect.y < simplex[p_max].y) {
-				simplex[p_max] = p_reflect;
-			}
-			else {
-				// Kontrakcja
-				solution p_contract = solution(centroid + beta * (simplex[p_max].x - centroid));
-				p_contract.fit_fun(ff, ud1, ud2);
-				if (p_contract.y < simplex[p_max].y) {
-					simplex[p_max] = p_contract;
-				}
-				else {
-					// Redukcja
-					for (int i = 0; i < N; ++i) {
-						if (i != p_min) {
-							simplex[i].x = simplex[p_min].x + delta * (simplex[i].x - simplex[p_min].x);
+			else
+			{
+				if (simplex[i_min].y <= simplex_reflected.y && simplex_reflected.y < simplex[i_max].y)
+					simplex[i_max] = simplex_reflected;
+				else
+				{
+					solution simplex_narrowed{};
+					simplex_narrowed.x = simplex_CoG + beta * (simplex[i_max].x - simplex_CoG);
+					simplex_narrowed.fit_fun(ff, ud1, ud2);
+					if (simplex_narrowed.y >= simplex[i_max].y)
+					{
+						for (int i = 0; i < simplex.size(); ++i)
+						{
+							if (i == i_min)
+								continue;
+							simplex[i].x = delta * (simplex[i].x + simplex[i_min].x);
 							simplex[i].fit_fun(ff, ud1, ud2);
 						}
 					}
+					else
+						simplex[i_max] = simplex_narrowed;
 				}
 			}
 
-			// Sprawdź kryterium zakończenia
-			double max_diff = 0.0;
-			for (int i = 0; i < N; ++i) {
-				for (int j = 0; j < n; ++j) {
-					max_diff = max(max_diff, abs(simplex[i].x(j) - simplex[p_min].x(j)));
-				}
+			if (solution::f_calls > Nmax)
+			{
+				simplex[i_min].flag = 0;
+				throw std::string("Maximum amount of f_calls reached!");
 			}
-			if (max_diff < epsilon || solution::f_calls > Nmax) {
-				Xopt = simplex[p_min];
-				Xopt.flag = 1;
-				break;
-			}
+
 		}
 
-		return Xopt;
+		//std::cout << simplex[i_min] << "\n";
+
+		return simplex[i_min];
 	}
-	catch (string ex_info) {
+	catch (string ex_info)
+	{
 		throw ("solution sym_NM(...):\n" + ex_info);
 	}
 }

@@ -69,7 +69,7 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2) {
     return dY;
 }
 
-matrix ff2T(matrix x, matrix ud1, matrix ud2) {
+matrix ff1R(matrix x, matrix ud1, matrix ud2) {
 	matrix y;
 	matrix Y0 = matrix(3, new double[3] {5, 1, 20});
 	matrix* Y = solve_ode(df1, 0, 1, 2000, Y0, x);
@@ -85,7 +85,7 @@ matrix ff2T(matrix x, matrix ud1, matrix ud2) {
 }
 
 
-matrix ff3T(matrix x, matrix ud1, matrix ud2) {
+matrix ff2T(matrix x, matrix ud1, matrix ud2) {
 	double x1 = x(0);
 	double x2 = x(1);
 
@@ -95,7 +95,7 @@ matrix ff3T(matrix x, matrix ud1, matrix ud2) {
 	return matrix(1, 1, result);
 }
 
-matrix df3(double t, matrix Y, matrix ud1, matrix ud2) {
+matrix df2(double t, matrix Y, matrix ud1, matrix ud2) {
 	double mr = 1.0;				//masa ramienia
 	double mc = 5.0;				//masa ciezarka
 	double l = 1;					//dl. ramienia
@@ -114,10 +114,10 @@ matrix df3(double t, matrix Y, matrix ud1, matrix ud2) {
 	return dY;
 }
 
-matrix ff3R(matrix x, matrix ud1, matrix ud2) {
+matrix ff2R(matrix x, matrix ud1, matrix ud2) {
 	matrix y = 0;
 	matrix Y0(2, 1), Yref(2, new double[2] {3.14, 0});
-	matrix* Y = solve_ode(df3, 0, 0.1, 100, Y0, Yref, x);
+	matrix* Y = solve_ode(df2, 0, 0.1, 100, Y0, Yref, x);
 	int n = get_len(Y[0]);
 	for (int i = 0; i < n; i++) {
 		y = y + 10 * pow(Yref(0) - Y[1](i, 0), 2) + pow(Yref(1) - Y[1](i, 1), 2) + pow(x(0) * (Yref(0) - Y[1](i, 0)) + x(1) * (Yref(1) - Y[1](i, 1)), 2);
@@ -127,7 +127,7 @@ matrix ff3R(matrix x, matrix ud1, matrix ud2) {
 }
 
 
-matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+matrix ff3T(matrix x, matrix ud1, matrix ud2) {
 	//ud1 - wspolczynnik a (?)
 	//ud2 - wspolczynnik kary c
 	double x1 = x(0);
@@ -153,7 +153,7 @@ matrix ff4T(matrix x, matrix ud1, matrix ud2) {
 	return y;
 }
 
-matrix ff4Tb(matrix x, matrix ud1, matrix ud2) {
+matrix ff3Tb(matrix x, matrix ud1, matrix ud2) {
 	double x1 = x(0);
 	double x2 = x(1);
 
