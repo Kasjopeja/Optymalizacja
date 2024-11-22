@@ -259,19 +259,13 @@ void lab3()
 	double epsilon = 1E-6;
 	int Nmax = 5000;
 	double c = 0.5;
-	double dc = 0.1;
+	double dc = 2;
 
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> x0_dist(1.0, 6.0);
+	//matrix x0(2, new double[2] {5, 10});
+	//cout << pen(ff3T, x0, c, dc, epsilon, Nmax);
 
-	for (int j = 0; j < 20; ++j)
-	{
-		matrix x0 = matrix(2, new double[2] {x0_dist(gen), x0_dist(gen)});
-		std::cout << x0(0) << " " << x0(1) << "\n";
-		std::cout << pen(ff3Tb, x0, c, dc, epsilon, Nmax) << "\n";
-		solution::clear_calls();
-	}
+	matrix x(2, new double[2] {5, 10});
+	cout << ff3R(x); // Wywolujac to bezposrednio a nie pen jakos dziala nie mam pojecia czemu
 }
 
 void lab4()

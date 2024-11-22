@@ -205,25 +205,27 @@ matrix ff3R(matrix x, matrix ud1, matrix ud2) {
 	int i0 = 0, i50 = 0;
 
 	for (int i = 0; i < n; i++) {
-		if (abs(Y[1](i, 2) - 50) < abs(Y[1](i0, 2))) {
+		if (abs(Y[1](i, 2) - 50) < abs(Y[1](i50, 2) - 50)) {
 			i50 = i;
 		}
-		if (abs(Y[1](i, 2)) < abs(Y[1](i50, 2))) {
+		if (abs(Y[1](i, 2)) < abs(Y[1](i0, 2))) {
 			i0 = i;
 		}
 	}
 
-	matrix y = -Y[1](i0, 0);
+	matrix y = -Y[1](i0, 0); //Minus zeby szukac minimum a nie maksimum
 
-	if (abs(x(0)) - 10 > 0) {
-		y = y + ud2 * pow(abs(x(0)) - 10, 2);
-	}
-	if (abs(x(1)) - 15 > 0) {
-		y = y + ud2 * pow(abs(x(0)) - 10, 2);
-	}
-	if (abs(Y[1](i50, 0) - 5) - 0.5 > 0) {
-		y = y + ud2 * pow(abs(x(0)) - 10, 2);
-	}
+	//Zakomentowane dla liczenia przykladu dla x = {5, 10}
+	
+	//if (abs(x(0)) - 10 > 0) {
+	//	y = y + ud2 * pow(abs(x(0)) - 10, 2);
+	//}
+	//if (abs(x(1)) - 15 > 0) {
+	//	y = y + ud2 * pow(abs(x(1)) - 15, 2);
+	//}
+	//if (abs(Y[1](i50, 0) - 5) - 0.5 > 0) {
+	//	y = y + ud2 * pow(abs(Y[1](i50, 0) - 5) - 0.5, 2);
+	//}
 
 	return y;
 }

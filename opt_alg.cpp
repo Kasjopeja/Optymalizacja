@@ -494,9 +494,9 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 
 		int i = 0;
 
-		double s = 0.5; //dlugosc boku trójk¹ta
+		double s = 0.5; //dlugosc boku trójkata
 		double alpha = 1.0; //Wspolczynnik odbicia
-		double beta = 0.5; //Wspolczynnik zwê¿enia
+		double beta = 0.5; //Wspolczynnik zwzenia
 		double gamma = 2.0; //Wspolczynnik ekspansji
 		double delta = 0.5; //Wspolczynnik redukcji
 
