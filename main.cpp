@@ -22,7 +22,8 @@ void lab6();
 int main()
 {
 	try
-	{
+	{	
+		#define TEORETYCZNE3
 		lab3();
 	}
 	catch (string EX_INFO)
@@ -36,10 +37,13 @@ int main()
 
 void lab0()
 {
-	//Funkcja testowa
 	double epsilon = 1e-2;
 	int Nmax = 10000;
 	matrix lb(2, 1, -5), ub(2, 1, 5), a(2, 1);
+
+#ifdef TEORETYCZNE0
+	
+	//Funkcja testowa
 	solution opt;
 	a(0) = -1;
 	a(1) = 2;
@@ -47,6 +51,10 @@ void lab0()
 	opt = MC(ff0T, 2, lb, ub, epsilon, Nmax, a);
 	cout << opt << endl << endl;
 	solution::clear_calls();
+
+#endif // TEORETYCZNE0
+
+#ifdef PRAKTYCZNE0
 
 	//Wahadlo
 	Nmax = 1000;
@@ -67,11 +75,13 @@ void lab0()
 	Sout.close();
 	Y[0].~matrix();
 	Y[1].~matrix();
+
+#endif // PRAKTYCZNE0
 }
 
 void lab1()
 {
-	/*
+#ifdef TEORETYCZNE1
 
 	std::ofstream Sout("symulacja_lab1.csv");
 	
@@ -103,7 +113,9 @@ void lab1()
 		x0 = x0 + 2;
 	}
 
-	*/
+#endif // TEORETYCZNE1
+
+#ifdef PRAKTYCZNE1
 
 	//zadanie praktyczne
 
@@ -123,7 +135,9 @@ void lab1()
 	cout << "Optymalna wielosc otworu D_A: " << wynik.x << "\nMaksymalna temperatura wody w zbiorniku: " << wynik.y + 50 << "|" << wynik.y << "\nLiczna wywolan fukcji: " << wynik.f_calls << "\nExit flag: " << wynik.flag << endl;
 	//cout << wynik;
 
+#endif // PRAKTYCZNE1
 
+#ifdef SYMULACJA1
 
 	//symlacja 
 
@@ -163,6 +177,8 @@ void lab1()
 	}
 	file.close();
 
+#endif // SYMULACJA1
+
 }
 
 void lab2()
@@ -175,6 +191,8 @@ void lab2()
 	double step = 0.01, alpha = 0.8, beta = 0.1, epsilon = 0.0001;
 	double a, b;
 	int Nmax = 1000;
+
+#ifdef TEORETYCZNE2
 
 	// zadanie teoretyczne
 
@@ -196,6 +214,9 @@ void lab2()
 		//cout << rosen;
 	}
 	
+#endif //TEORETYCZNE2
+
+#ifdef PRAKTYCZNE2
 
 	//problem rzeczywisty
 
@@ -252,10 +273,13 @@ void lab2()
 	}
 	file.close();
 
+#endif // PRAKTYCZNE2
 }
 
 void lab3()
 {
+#ifdef TEORETYCZNE3
+
 	double epsilon = 1E-6;
 	int Nmax = 5000;
 	double c = 0.5;
@@ -266,6 +290,8 @@ void lab3()
 
 	matrix x(2, new double[2] {5, 10});
 	cout << ff3R(x); // Wywolujac to bezposrednio a nie pen jakos dziala nie mam pojecia czemu
+
+#endif // TEORETYCZNE3
 }
 
 void lab4()
