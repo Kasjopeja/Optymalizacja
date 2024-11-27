@@ -24,7 +24,14 @@ int main()
 	try
 	{	
 		#define TEORETYCZNE3
+
+		lab0();
+		lab1();
+		lab2();
 		lab3();
+		lab4();
+		lab5();
+		lab6();
 	}
 	catch (string EX_INFO)
 	{
@@ -282,16 +289,28 @@ void lab3()
 
 	double epsilon = 1E-6;
 	int Nmax = 5000;
-	double c = 0.5;
-	double dc = 2;
 
-	//matrix x0(2, new double[2] {5, 10});
-	//cout << pen(ff3T, x0, c, dc, epsilon, Nmax);
+	double s = 0.5; //dlugosc boku trójkata
+	double alpha = 1.0; //Wspolczynnik odbicia
+	double beta = 0.5; //Wspolczynnik zwzenia
+	double gamma = 2.0; //Wspolczynnik ekspansji
+	double delta = 0.5; //Wspolczynnik redukcji
+	double c = 0.5; //wspołczynnik kary 
+	double a = 5.0; //parametr a
+
+
+	matrix x0(2, new double[2] {5, 10});
+	cout << sym_NM(ff3T, x0, s, alpha, beta, gamma, delta, epsilon, Nmax, a, c);
+
+#endif // TEORETYCZNE3
+
+#ifdef PRAKTYCZNE3
 
 	matrix x(2, new double[2] {5, 10});
 	cout << ff3R(x); // Wywolujac to bezposrednio a nie pen jakos dziala nie mam pojecia czemu
 
-#endif // TEORETYCZNE3
+#endif // PRAKTYCZNE3
+
 }
 
 void lab4()
