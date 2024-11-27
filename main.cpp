@@ -23,7 +23,7 @@ int main()
 {
 	try
 	{	
-		#define TEORETYCZNE3
+		#define PRAKTYCZNE3
 
 		lab0();
 		lab1();
@@ -327,22 +327,22 @@ void lab3()
 
 		for (int j = 0; j < 100; ++j) {
 			test_x0 = matrix(2, new double[2] {x0_dist(gen), x0_dist(gen)});
-			test_ss << test_x0(0) << ";" << test_x0(1) << ";";
+			test_ss << test_x0(0) << "X ;" << test_x0(1) << "X ;";
 
 			// Zewnętrzne rozwiązanie
 			test_sol = pen(ff3T_outside, test_x0, c_outside, dc_outside, epsilon, Nmax, a);
 			//cout << test_sol;
-			test_ss << test_sol.x(0) << ";" << test_sol.x(1) << ";"
-				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << ";"
-				<< test_sol.y << ";" << test_sol.f_calls << ";";
+			test_ss << test_sol.x(0) << "X ;" << test_sol.x(1) << "X ;"
+				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << "X ;"
+				<< test_sol.y << "X ;" << test_sol.f_calls << "X ;";
 			solution::clear_calls();
 
 			// Wewnętrzne rozwiązanie
 			test_sol = pen(ff3T_inside, test_x0, c_inside, dc_inside, epsilon, Nmax, a);
 			//cout << test_sol;
-			test_ss << test_sol.x(0) << ";" << test_sol.x(1) << ";"
-				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << ";"
-				<< test_sol.y << ";" << test_sol.f_calls << "\n";
+			test_ss << test_sol.x(0) << "X ;" << test_sol.x(1) << "X ;"
+				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << "X ;"
+				<< test_sol.y << "X ;" << test_sol.f_calls << "X \n";
 			solution::clear_calls();
 		}
 	}
@@ -355,8 +355,41 @@ void lab3()
 
 #ifdef PRAKTYCZNE3
 
-	matrix x(2, new double[2] {5, 10});
-	cout << ff3R(x); // Wywolujac to bezposrednio a nie pen jakos dziala nie mam pojecia czemu
+	// Nagłówki w pliku CSV
+	Sout << "time;x_position;y_position\n";
+
+	//Dane zadania
+	matrix ud1 = matrix(5, new double[5] {
+		0.47, //Współczynnik oporu (C) [-]
+		1.2, //Gęstość powietrza (rho) [kg/m^3]
+		0.12, //Promień piłki (r) [m]
+		0.6, //Masa piłki (m) [kg]
+		9.81 //Przyśpieszenie ziemskie (g) [m/s^2]
+});
+
+	//Początkowe wartości szukania minimum
+	matrix x0 = matrix(2, new double[2] {-4.0, 2.0});
+
+	//Szukanie optymalnej prędkości początkowej po osi x i początkowej prędkości obrotowej
+	solution opt = pen(ff3R, x0, c_outside, dc_outside, epsilon, Nmax, ud1);
+	std::cout << opt << "\n";
+
+	//Symulacja lotu piłki dla wyznaczonych ograniczeń
+	matrix Y0(4, new double[4] {0.0, opt.x(0), 100, 0});
+	matrix* Y = solve_ode(df3, 0.0, 0.01, 7.0, Y0, ud1, opt.x(1));
+
+	// Zapis wyników symulacji do pliku CSV
+	int num_rows = get_len(Y[0]);
+	for (int i = 0; i < num_rows; ++i) {
+		Sout << Y[0](i) << "x ;"  // Czas
+			<< Y[1](i, 0) << "x ;"  // Pozycja w osi x
+			<< Y[1](i, 2) << "x \n";  // Pozycja w osi y
+	}
+
+	// Zamknięcie pliku i usunięcie dynamicznie alokowanej pamięci
+	Sout.close();
+	delete[] Y;
+	
 
 #endif // PRAKTYCZNE3
 
