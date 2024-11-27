@@ -397,104 +397,167 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	}
 }
 
+solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1, matrix ud2)
+{
+	try {
+		solution XB;
+		XB.x = x0;
+		XB.fit_fun(ff, ud1, ud2);
+
+		solution XT;
+		XT = XB;
+
+		double s = 0.5; //Długość boku trójkąta
+		double alpha = 1.0; //Współczynnik odbicia
+		double beta = 0.5; //Współczynnik zwężenia
+		double gamma = 2.0; //Współczynnik ekspansji
+		double delta = 0.5; //Współczynnik redukcji
+
+		do
+		{
+			XT.x = XB.x;
+			XT = sym_NM(ff, XB.x, s, alpha, beta, gamma, delta, epsilon, Nmax, ud1, c);
+			c *= dc;
+
+			if (solution::f_calls > Nmax)
+			{
+				XT.flag = 0;
+				throw std::string("Maximum amount of f_calls reached!");
+			}
+
+			if (norm(XT.x - XB.x) < epsilon)
+				break;
+
+			XB = XT;
+		} while (true);
+
+		return XT;
+	}
+	catch (string ex_info)
+	{
+		throw ("solution pen(...):\n" + ex_info);
+	}
+}
+
 solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
 	try
 	{
-		double scal = 1.1;
-		solution Xopt;
-		int n = get_dim(x0);
-		std::vector<matrix> simplex(n + 1, x0);
+		//Funkcja pomocnicza do znajdywania maksymum normy
+		auto max = [&](std::vector<solution> sim, int i_min) -> double
+		{
+			double result = 0.0;
+			for (int i = 0; i < sim.size(); ++i)
+			{
+				double normal = norm(sim[i_min].x - sim[i].x);
+				if (result < normal)
+					result = normal;
+			}
+			return result;
+		};
 
-		// Initialize simplex vertices
-		for (int i = 1; i <= n; ++i) {
-			matrix vertex = x0;
-			vertex(i - 1) += s;
-			simplex[i] = vertex;
+		int n = get_len(x0);
+
+		//Tworzenie bazy ortogonalnej
+		matrix d = matrix(n, n);
+		for (int i = 0; i < n; ++i)
+			d(i, i) = 1.0;
+
+		//Tworzenie simplexu i uzupełnianie go danymi
+		std::vector<solution> simplex;
+		simplex.resize(n + 1);
+		simplex[0].x = x0;
+		simplex[0].fit_fun(ff, ud1, ud2);
+		for (int i = 1; i < simplex.size(); ++i)
+		{
+			simplex[i].x = simplex[0].x + s * d[i - 1];
+			simplex[i].fit_fun(ff, ud1, ud2);
 		}
 
-		solution opt_sol;
-		opt_sol.x = x0;
+		//Indeks najmniejszej wartości wierzchołka simplexu
+		int i_min{};
+		//Indeks największej wartości wierzchołka simplexu
+		int i_max{};
 
-		for (int iter = 0; iter < Nmax; ++iter) {
-			// Sort vertices by function value (including penalty)
-			std::sort(simplex.begin(), simplex.end(), [&](const matrix& a, const matrix& b) {
-				double a_val = ff(a, ud1, ud2)(0, 0);
-				double b_val = ff(b, ud1, ud2)(0, 0);
-				double a_penalty = 0;
-				double b_penalty = 0;
-		
-				// ograniczenia zewnetrzne
-				a_penalty = std::max(0.0, -a(0) + 1) + std::max(0.0, -a(1) + 1) + std::max(0.0, a(0) + a(1) - ud1(0, 0));
-				b_penalty = std::max(0.0, -b(0) + 1) + std::max(0.0, -b(1) + 1) + std::max(0.0, b(0) + b(1) - ud1(0, 0));
-
-				return (a_val + ud2* a_penalty) < (b_val + ud2* b_penalty);
-			});
-
-			matrix pmin = simplex[0];
-			matrix pmax = simplex[n];
-			matrix centroid = matrix(n, 1);
-
-			for (int i = 0; i < n; ++i) {
-				if (i != n) centroid = centroid + simplex[i];
+		while (max(simplex, i_min) >= epsilon)
+		{
+			//Wyznaczanie maksymalnego i minimalnego indeksu
+			i_min = 0;
+			i_max = 0;
+			for (int i = 1; i < simplex.size(); ++i)
+			{
+				if (simplex[i].y < simplex[i_min].y)
+					i_min = i;
+				if (simplex[i].y > simplex[i_max].y)
+					i_max = i;
 			}
-			centroid = centroid * (1.0 / n);
 
-			// Reflection
-			matrix reflection = centroid + alpha * (centroid - pmax);
-			double reflection_penalty = std::max(0.0, -reflection(0) + 1) + std::max(0.0, -reflection(1) + 1) + std::max(0.0, reflection(0) + reflection(1) - ud1(0, 0));
-			if (ff(reflection, ud1, ud2)(0, 0) + reflection_penalty < ff(pmin, ud1, ud2)(0, 0)) {
-				// Expansion
-				matrix expansion = centroid + gamma * (reflection - centroid);
-				double expansion_penalty = std::max(0.0, -expansion(0) + 1) + std::max(0.0, -expansion(1) + 1) + std::max(0.0, expansion(0) + expansion(1) - ud1(0, 0));
-				if (ff(expansion, ud1, ud2)(0, 0) + expansion_penalty < ff(reflection, ud1, ud2)(0, 0) + reflection_penalty) {
-					simplex[n] = expansion;
-				}
-				else {
-					simplex[n] = reflection;
-				}
+			//Wyznaczenie środka ciężkości
+			matrix simplex_CoG{};
+			for (int i = 0; i < simplex.size(); ++i)
+			{
+				if (i == i_max)
+					continue;
+				simplex_CoG = simplex_CoG + simplex[i].x;
 			}
-			else if (ff(reflection, ud1, ud2)(0, 0) + reflection_penalty < ff(pmax, ud1, ud2)(0, 0)) {
-				simplex[n] = reflection;
+			simplex_CoG = simplex_CoG / simplex.size();
+
+			//Obliczanie wartości funkcji odbitego simplexu
+			solution simplex_reflected{};
+			simplex_reflected.x = simplex_CoG + alpha * (simplex_CoG - simplex[i_max].x);
+			simplex_reflected.fit_fun(ff, ud1, ud2);
+
+			if (simplex_reflected.y < simplex[i_min].y)
+			{
+				//Obliczanie wartości funkcji powiększonego simplexu
+				solution simplex_expansion{};
+				simplex_expansion.x = simplex_CoG + gamma * (simplex_reflected.x - simplex_CoG);
+				simplex_expansion.fit_fun(ff, ud1, ud2);
+				if (simplex_expansion.y < simplex_reflected.y)
+					simplex[i_max] = simplex_expansion;
+				else
+					simplex[i_max] = simplex_reflected;
 			}
-			else {
-				// Contraction
-				matrix contraction = centroid + beta * (pmax - centroid);
-				double contraction_penalty = std::max(0.0, -contraction(0) + 1) + std::max(0.0, -contraction(1) + 1) + std::max(0.0, contraction(0) + contraction(1) - ud1(0, 0));
-				if (ff(contraction, ud1, ud2)(0, 0) + contraction_penalty < ff(pmax, ud1, ud2)(0, 0)) {
-					simplex[n] = contraction;
-				}
-				else {
-					// Reduction
-					for (int i = 1; i <= n; ++i) {
-						simplex[i] = pmin + delta * (simplex[i] - pmin);
+			else
+			{
+				if (simplex[i_min].y <= simplex_reflected.y && simplex_reflected.y < simplex[i_max].y)
+					simplex[i_max] = simplex_reflected;
+				else
+				{
+					//Obliczanie wartości funkcji pomniejszonego simplexu
+					solution simplex_narrowed{};
+					simplex_narrowed.x = simplex_CoG + beta * (simplex[i_max].x - simplex_CoG);
+					simplex_narrowed.fit_fun(ff, ud1, ud2);
+					if (simplex_narrowed.y >= simplex[i_max].y)
+					{
+						for (int i = 0; i < simplex.size(); ++i)
+						{
+							if (i == i_min)
+								continue;
+							simplex[i].x = delta * (simplex[i].x + simplex[i_min].x);
+							simplex[i].fit_fun(ff, ud1, ud2);
+						}
 					}
+					else
+						simplex[i_max] = simplex_narrowed;
 				}
 			}
 
-			// Check convergence
-			double max_dist = 0.0;
-			for (int i = 0; i <= n; ++i) {
-				max_dist = std::max(max_dist, norm(simplex[i] - pmin));
+			if (solution::f_calls > Nmax)
+			{
+				simplex[i_min].flag = 0;
+				throw std::string("Maximum amount of f_calls reached!");
 			}
-			if (max_dist < epsilon) break;
-			ud2 = ud2 * scal;
+
 		}
 
-		opt_sol.x = simplex[0];
-		opt_sol.y = ff(opt_sol.x, ud1, ud2);
-		return opt_sol;
-
-		solution symplex[3];
-
-		return Xopt;
+		return simplex[i_min];
 	}
 	catch (string ex_info)
 	{
 		throw ("solution sym_NM(...):\n" + ex_info);
 	}
 }
-
 
 
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)

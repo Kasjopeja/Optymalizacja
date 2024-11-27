@@ -127,72 +127,111 @@ matrix ff2R(matrix x, matrix ud1, matrix ud2) {
 }
 
 
-matrix ff3T(matrix x, matrix ud1, matrix ud2) {
-	double x1 = x(0);
-	double x2 = x(1);
+matrix ff3T_outside(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	y = (sin(3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)))) / (3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)));
 
-	double licznik = sin(3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2))));
-	double mianownik = 3.14 * sqrt((pow(x1 / 3.14, 2)) + (pow(x2 / 3.14, 2)));
+	double a = m2d(ud1);
+	double c = m2d(ud2);
 
-	double result = licznik / mianownik;
+	//g1
+	if (-x(0) + 1 > 0)
+		y = y + c * pow(-x(0) + 1, 2);
+	//g2
+	if (-x(1) + 1 > 0)
+		y = y + c * pow(-x(1) + 1, 2);
+	//g3
+	if (norm(x) - a > 0)
+		y = y + c * pow(norm(x) - a, 2);
 
-	matrix y = matrix(1, 1, result);
 	return y;
 }
 
+matrix ff3T_inside(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	y = (sin(3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)))) / (3.14 * sqrt(pow(x(0) / 3.14, 2) + pow(x(1) / 3.14, 2)));
 
-matrix df3(double t, matrix Y, matrix ud1, matrix ud2) {
-	double m = 0.6;
-	double r = 0.12;
-	double g = 9.81;
-	double C = 0.47;
-	double ro = 1.2;
-	double S = 3.14 * pow(r, 2);
-	double omega = ud2(0);
-	
-	double Dx = 0.5 * C * ro * S * Y(1) * abs(Y(1));
-	double Dy = 0.5 * C * ro * S * Y(3) * abs(Y(3));
+	double a = m2d(ud1);
+	double c = m2d(ud2);
 
-	double Fmx = ro * Y(3) * omega * 3.14 * pow(r, 3);
-	double Fmy= ro * Y(1) * omega * 3.14 * pow(r, 3);
+	//g1
+	if (-x(0) + 1 > 0)
+		y = 1E10;
+	else
+		y = y - c / (-x(0) + 1);
+	//g2
+	if (-x(1) + 1 > 0)
+		y = 1E10;
+	else
+		y = y - c / (-x(1) + 1);
+	//g3
+	if (norm(x) - a > 0)
+		y = 1E10;
+	else
+		y = y - c / (norm(x) - a);
 
-	matrix dY(4, 1);
-	dY(0) = Y(1);
-	dY(1) = (-Fmx - Dx) / m;
-	dY(2) = Y(3);
-	dY(3) = ((-m * g) - Dy - Fmy) / m;
-	return dY;
+	return y;
 }
 
-
-matrix ff3R(matrix x, matrix ud1, matrix ud2) {
-	matrix Y0(4, new double[4] {0, x(0), 100, 0});
-	matrix* Y = solve_ode(df3, 0, 0.01, 7, Y0, ud1, x(1));
+matrix ff3R(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	matrix Y0(4, new double[4] {0.0, x(0), 100, 0});
+	matrix* Y = solve_ode(df3, 0.0, 0.01, 7.0, Y0, ud1, x(1));
 	int n = get_len(Y[0]);
-	int i0 = 0, i50 = 0;
-
-	for (int i = 0; i < n; i++) {
-		if (abs(Y[1](i, 2) - 50) < abs(Y[1](i50, 2) - 50)) {
+	int i50 = 0;
+	int i_0 = 0;
+	for (int i = 0; i < n; ++i)
+	{
+		if (abs(Y[1](i, 2) - 50.0) < abs(Y[1](i50, 2) - 50.0))
 			i50 = i;
-		}
-		if (abs(Y[1](i, 2)) < abs(Y[1](i0, 2))) {
-			i0 = i;
-		}
+		if (abs(Y[1](i, 2)) < abs(Y[1](i_0, 2)))
+			i_0 = i;
 	}
 
-	matrix y = -Y[1](i0, 0); //Minus zeby szukac minimum a nie maksimum
+	y = -Y[1](i_0, 0);
 
-	//Zakomentowane dla liczenia przykladu dla x = {5, 10}
-	
-	//if (abs(x(0)) - 10 > 0) {
-	//	y = y + ud2 * pow(abs(x(0)) - 10, 2);
-	//}
-	//if (abs(x(1)) - 15 > 0) {
-	//	y = y + ud2 * pow(abs(x(1)) - 15, 2);
-	//}
-	//if (abs(Y[1](i50, 0) - 5) - 0.5 > 0) {
-	//	y = y + ud2 * pow(abs(Y[1](i50, 0) - 5) - 0.5, 2);
-	//}
+	if (abs(x(0)) - 10 > 0)
+		y = y + ud2 * pow(abs(x(0)) - 10, 2);
+	if (abs(x(1)) - 15 > 0)
+		y = y + ud2 * pow(abs(x(1)) - 15, 2);
+	if (abs(Y[1](i50, 0) - 5.0) - 0.5 > 0)
+		y = y + ud2 * pow(abs(Y[1](i50, 0) - 5.0) - 0.5, 2);
 
 	return y;
+}
+
+matrix df3(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	//Wektor zmian po czasie
+	matrix dY(4, 1);
+
+	//Zmienne dane
+	double x = Y(0);
+	double v_x = Y(1);
+	double y = Y(2);
+	double v_y = Y(3);
+
+	//Dane zadania
+	double C = ud1(0);
+	double rho = ud1(1);
+	double r = ud1(2);
+	double m = ud1(3);
+	double g = ud1(4);
+
+	double s = 3.14 * pow(r, 2);
+
+	double D_x = (1.0 / 2.0) * C * rho * s * v_x * abs(v_x);
+	double D_y = (1.0 / 2.0) * C * rho * s * v_y * abs(v_y);
+	double FM_x = rho * v_y * m2d(ud2) * 3.14 * pow(r, 3);
+	double FM_y = rho * v_x * m2d(ud2) * 3.14 * pow(r, 3);
+
+	dY(0) = v_x;
+	dY(1) = (-D_x - FM_x) / m;
+	dY(2) = v_y;
+	dY(3) = ((-m * g) - D_y - FM_y) / m;
+
+	return dY;
 }
