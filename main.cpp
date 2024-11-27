@@ -24,7 +24,14 @@ int main()
 	try
 	{	
 		#define TEORETYCZNE3
+
+		lab0();
+		lab1();
+		lab2();
 		lab3();
+		lab4();
+		lab5();
+		lab6();
 	}
 	catch (string EX_INFO)
 	{
@@ -278,20 +285,81 @@ void lab2()
 
 void lab3()
 {
+	// Dane dokładnościowe
+	double epsilon = 1E-3;
+	int Nmax = 10000;
+	double c_inside = 100;
+	double dc_inside = 0.2;
+	double c_outside = 1.0;
+	double dc_outside = 1.5;
+
+	std::ofstream Sout("symulacja_lab3.csv");
+
 #ifdef TEORETYCZNE3
 
-	double epsilon = 1E-6;
-	int Nmax = 5000;
-	double c = 0.5;
-	double dc = 2;
+	// Nagłówki w pliku CSV
+	Sout << "x0_1;x0_2;x1_out;x2_out;norm_out;y_out;f_calls_out;x1_in;x2_in;norm_in;y_in;f_calls_in\n";
 
-	//matrix x0(2, new double[2] {5, 10});
-	//cout << pen(ff3T, x0, c, dc, epsilon, Nmax);
+	// Generator liczb losowych
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> x0_dist(1.5, 5.5);
+
+	// Stringstream do zapisu danych
+	std::stringstream test_ss;
+
+	// Rozwiązanie dla wyników testowych
+	solution test_sol;
+
+	// Dane a dla testów
+	matrix a = matrix(4.0);
+
+	// Punkty startowe dla testów
+	matrix test_x0{};
+
+	for (int i = 0; i < 3; ++i) {
+		if (i == 0)
+			a = matrix(4.0);
+		else if (i == 1)
+			a = matrix(4.4934);
+		else
+			a = matrix(5.0);
+
+		for (int j = 0; j < 100; ++j) {
+			test_x0 = matrix(2, new double[2] {x0_dist(gen), x0_dist(gen)});
+			test_ss << test_x0(0) << ";" << test_x0(1) << ";";
+
+			// Zewnętrzne rozwiązanie
+			test_sol = pen(ff3T_outside, test_x0, c_outside, dc_outside, epsilon, Nmax, a);
+			//cout << test_sol;
+			test_ss << test_sol.x(0) << ";" << test_sol.x(1) << ";"
+				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << ";"
+				<< test_sol.y << ";" << test_sol.f_calls << ";";
+			solution::clear_calls();
+
+			// Wewnętrzne rozwiązanie
+			test_sol = pen(ff3T_inside, test_x0, c_inside, dc_inside, epsilon, Nmax, a);
+			//cout << test_sol;
+			test_ss << test_sol.x(0) << ";" << test_sol.x(1) << ";"
+				<< sqrt(pow(test_sol.x(0), 2) + pow(test_sol.x(1), 2)) << ";"
+				<< test_sol.y << ";" << test_sol.f_calls << "\n";
+			solution::clear_calls();
+		}
+	}
+
+	// Zapis zawartości stringstream do pliku
+	Sout << test_ss.str();
+	Sout.close();
+
+#endif // TEORETYCZNE3
+
+#ifdef PRAKTYCZNE3
 
 	matrix x(2, new double[2] {5, 10});
 	cout << ff3R(x); // Wywolujac to bezposrednio a nie pen jakos dziala nie mam pojecia czemu
 
-#endif // TEORETYCZNE3
+#endif // PRAKTYCZNE3
+
 }
 
 void lab4()

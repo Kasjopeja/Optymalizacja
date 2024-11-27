@@ -36,7 +36,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 	{
 		double* p = new double[2] { 0, 0 };
 		//Tu wpisz kod funkcji
-		// 
+		
 		//Wersja pod f_calls
 
 		solution::clear_calls();
@@ -389,7 +389,6 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				return XB;
 			}
 		}
-		
 
 	}
 	catch (string ex_info)
@@ -403,24 +402,21 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 	try {
 		solution XB;
 		XB.x = x0;
-		XB.fit_fun(ff);
+		XB.fit_fun(ff, ud1, ud2);
 
 		solution XT;
 		XT = XB;
 
-		int i = 0;
-
-		double s = 0.5; //dlugosc boku trójkata
-		double alpha = 1.0; //Wspolczynnik odbicia
-		double beta = 0.5; //Wspolczynnik zwzenia
-		double gamma = 2.0; //Wspolczynnik ekspansji
-		double delta = 0.5; //Wspolczynnik redukcji
+		double s = 0.5; //Długość boku trójkąta
+		double alpha = 1.0; //Współczynnik odbicia
+		double beta = 0.5; //Współczynnik zwężenia
+		double gamma = 2.0; //Współczynnik ekspansji
+		double delta = 0.5; //Współczynnik redukcji
 
 		do
 		{
-			i++;
 			XT.x = XB.x;
-			XT = sym_NM(ff, XB.x, s, alpha, beta, gamma, delta, epsilon, Nmax, 5.0, c);
+			XT = sym_NM(ff, XB.x, s, alpha, beta, gamma, delta, epsilon, Nmax, ud1, c);
 			c *= dc;
 
 			if (solution::f_calls > Nmax)
@@ -433,7 +429,6 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 				break;
 
 			XB = XT;
-
 		} while (true);
 
 		return XT;
@@ -444,23 +439,22 @@ solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc
 	}
 }
 
-
 solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
-
 	try
 	{
+		//Funkcja pomocnicza do znajdywania maksymum normy
 		auto max = [&](std::vector<solution> sim, int i_min) -> double
+		{
+			double result = 0.0;
+			for (int i = 0; i < sim.size(); ++i)
 			{
-				double result = 0.0;
-				for (int i = 0; i < sim.size(); ++i)
-				{
-					double normal = norm(sim[i_min].x - sim[i].x);
-					if (result < normal)
-						result = normal;
-				}
-				return result;
-			};
+				double normal = norm(sim[i_min].x - sim[i].x);
+				if (result < normal)
+					result = normal;
+			}
+			return result;
+		};
 
 		int n = get_len(x0);
 
@@ -469,7 +463,7 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 		for (int i = 0; i < n; ++i)
 			d(i, i) = 1.0;
 
-		//Tworzenie simplexu i uzupelnianie go danymi
+		//Tworzenie simplexu i uzupełnianie go danymi
 		std::vector<solution> simplex;
 		simplex.resize(n + 1);
 		simplex[0].x = x0;
@@ -480,9 +474,9 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 			simplex[i].fit_fun(ff, ud1, ud2);
 		}
 
-		//Indeks najmniejszej wartoœci wierzcholka simplexu
+		//Indeks najmniejszej wartości wierzchołka simplexu
 		int i_min{};
-		//Indeks najwiekszej wartosci wierzcholka simplexu
+		//Indeks największej wartości wierzchołka simplexu
 		int i_max{};
 
 		while (max(simplex, i_min) >= epsilon)
@@ -498,7 +492,7 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 					i_max = i;
 			}
 
-			//Wyznaczenie œrodka ciê¿koœci
+			//Wyznaczenie środka ciężkości
 			matrix simplex_CoG{};
 			for (int i = 0; i < simplex.size(); ++i)
 			{
@@ -508,13 +502,14 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 			}
 			simplex_CoG = simplex_CoG / simplex.size();
 
-			//Obliczanie wartoœci funkcji odbitego simplexu
+			//Obliczanie wartości funkcji odbitego simplexu
 			solution simplex_reflected{};
 			simplex_reflected.x = simplex_CoG + alpha * (simplex_CoG - simplex[i_max].x);
 			simplex_reflected.fit_fun(ff, ud1, ud2);
 
 			if (simplex_reflected.y < simplex[i_min].y)
 			{
+				//Obliczanie wartości funkcji powiększonego simplexu
 				solution simplex_expansion{};
 				simplex_expansion.x = simplex_CoG + gamma * (simplex_reflected.x - simplex_CoG);
 				simplex_expansion.fit_fun(ff, ud1, ud2);
@@ -529,6 +524,7 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 					simplex[i_max] = simplex_reflected;
 				else
 				{
+					//Obliczanie wartości funkcji pomniejszonego simplexu
 					solution simplex_narrowed{};
 					simplex_narrowed.x = simplex_CoG + beta * (simplex[i_max].x - simplex_CoG);
 					simplex_narrowed.fit_fun(ff, ud1, ud2);
@@ -555,8 +551,6 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 
 		}
 
-		//std::cout << simplex[i_min] << "\n";
-
 		return simplex[i_min];
 	}
 	catch (string ex_info)
@@ -564,7 +558,6 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 		throw ("solution sym_NM(...):\n" + ex_info);
 	}
 }
-
 
 
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
