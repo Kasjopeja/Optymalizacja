@@ -566,6 +566,26 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		int i = 0;
+		Xopt.x = x0;
+		matrix x_next = Xopt.x;
+		matrix d;
+		double h;
+		while (true) {
+			Xopt.x = x_next;
+			d = -Xopt.grad(gf);
+			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
+			x_next = Xopt.x + h * d;
+			i++;
+			if (Xopt.g_calls > Nmax) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (norm(x_next - Xopt.x) < epsilon) {
+				Xopt.flag = 1;
+				break;
+			}
+		}
 
 		return Xopt;
 	}
@@ -581,12 +601,41 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		int i = 0;
+		Xopt.x = x0;
+		solution x_next = Xopt.x;
+		matrix d;
+		matrix d_prev;
+		double h;
+		matrix beta;
+		while (true) {
+			if (i > 0)
+			{
+				d = -Xopt.grad(gf);
+			}
+			else {
+				beta = pow(norm(x_next.grad(gf)), 2) / pow(norm(Xopt.grad(gf)), 2);
+				d = -Xopt.grad(gf) + beta * d;
+			}
+			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
+			Xopt.x = x_next.x;
+			x_next.x = Xopt.x + h * d;
+			i++;
+			if (Xopt.g_calls > Nmax) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (norm(x_next.x - Xopt.x) < epsilon) {
+				Xopt.flag = 1;
+				break;
+			}
+		}
 
 		return Xopt;
 	}
 	catch (string ex_info)
 	{
-		throw ("solution CG(...):\n" + ex_info);
+		throw ("solution SD(...):\n" + ex_info);
 	}
 }
 
@@ -597,7 +646,7 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
-
+		//do zrobienia, obliczanie h juz jest, teraz tylko odwrocisz go funkcja inv
 		return Xopt;
 	}
 	catch (string ex_info)

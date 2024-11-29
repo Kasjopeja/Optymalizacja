@@ -235,3 +235,41 @@ matrix df3(double t, matrix Y, matrix ud1, matrix ud2)
 
 	return dY;
 }
+
+matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+	matrix y;
+
+	if (isnan(ud2(0, 0))) {
+		y = (pow((x(0) + 2 * x(1) -7), 2) + pow(2 * (x(0) + x(1) - 5), 2));
+	}
+	else {
+		y = ff4T(ud2[0] + x * ud2[1]);
+	}
+
+	return y;
+}
+
+matrix gf4T(matrix x, matrix ud1, matrix ud2) {
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double df_dx1 = 2 * (x1 + 2 * x2 - 7) + 4 * (2 * x1 + x2 - 5);
+	double df_dx2 = 4 * (x1 + 2 * x2 - 7) + 2 * (2 * x1 + x2 - 5);
+
+	return matrix(2, new double[2] {df_dx1, df_dx2});
+}
+
+matrix hf4T(matrix x, matrix ud1, matrix ud2) {
+	double x1 = x(0);
+	double x2 = x(1);
+
+	double d2f_dx12 = 10;
+	double d2f_dx22 = 10;
+	double d2f_dx1x2 = 8;
+
+	matrix H(2, 2);
+	H(0, 0) = H(1, 1) = 10;
+	H(0, 1) = H(1, 0) = 8;
+
+	return H;
+}

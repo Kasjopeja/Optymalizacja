@@ -23,7 +23,7 @@ int main()
 {
 	try
 	{	
-		#define PRAKTYCZNE3
+		#define TEORETYCZNE4
 
 		lab0();
 		lab1();
@@ -397,7 +397,21 @@ void lab3()
 
 void lab4()
 {
+#ifdef TEORETYCZNE4
+	double epsilon = 1e-6;
+	double h0 = 0.05;
+	double a = 0.0;
+	double b = 1.0;
+	int Nmax = 1000;
 
+	matrix x0 = matrix(2, new double[2] {0.0, 0.0});
+	matrix ud1 = NAN;
+	matrix ud2 = NAN;
+
+	//solution grad_result = SD(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+	solution grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+	std::cout << "Gradient Calculation Result:\n" << grad_result << "\n";
+#endif
 }
 
 void lab5()
