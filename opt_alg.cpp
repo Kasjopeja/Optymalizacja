@@ -605,7 +605,6 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 		Xopt.x = x0;
 		solution x_next = Xopt.x;
 		matrix d;
-		matrix d_prev;
 		double h;
 		matrix beta;
 		while (true) {
@@ -646,12 +645,35 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
-		//do zrobienia, obliczanie h juz jest, teraz tylko odwrocisz go funkcja inv
+		int i = 0;
+		Xopt.x = x0;
+		matrix x_next = Xopt.x;
+		matrix d;
+		double h; //krok
+		matrix H; //hesjan
+		while (true) {
+			Xopt.x = x_next;
+			H = Xopt.hess(Hf);
+			H = inv(H);
+			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
+			d = -H * Xopt.grad(gf);
+			x_next = Xopt.x + h * d;
+			i++;
+			if (Xopt.g_calls > Nmax || Xopt.H_calls > Nmax || Xopt.f_calls > 0) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (norm(x_next - Xopt.x) < epsilon) {
+				Xopt.flag = 1;
+				break;
+			}
+		}
+
 		return Xopt;
 	}
 	catch (string ex_info)
 	{
-		throw ("solution Newton(...):\n" + ex_info);
+		throw ("solution SD(...):\n" + ex_info);
 	}
 }
 
@@ -659,8 +681,42 @@ solution golden(matrix(*ff)(matrix, matrix, matrix), double a, double b, double 
 {
 	try
 	{
+		//Jest chyba dobrze zaimplementowana ale nie do konca wiem jak to wykorzystac w funkcjach SD, CG, Newton
+		//Wiem ze trzeba ja uzyc do obliczania h, ale nie jestem pewny jak to dokladnie bedzie wygladac
+		//Wtedy krok w pseudokodzie "wyznacz h(i)" zamiast uzywania stalej wartosci h0 uzywa golden do wyznaczenia jej dynamicznie
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		double alpha = (pow(5, 0.5) - 1) / 2;
+		solution as, bs, cs, ds;
+		as.x = a;
+		bs.x = b;
+		cs.x = bs.x - alpha * (bs.x - as.x);
+		ds.x = as.x + alpha * (bs.x - as.x);
+		while (true) {
+			cs.fit_fun(ff);
+			ds.fit_fun(ff);
+			if (cs.y < ds.y) {
+				bs.x = ds.x;
+				ds.x = cs.x;
+				cs.x = bs.x - alpha * (bs.x - as.x);
+			}
+			else {
+				as.x = cs.x;
+				bs.x = ds.x;
+				cs.x = ds.x;
+				ds.x = as.x + alpha * (bs.x - as.x);
+			}
+			if (Xopt.f_calls > 0) {
+				Xopt.flag = 0;
+				break;
+			}
+			if (bs.x - as.x < epsilon) {
+				Xopt.flag = 1;
+				break;
+			}
+		}
+
+		Xopt.x = (as.x + bs.x) / 2;
 
 		return Xopt;
 	}

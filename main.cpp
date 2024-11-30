@@ -409,8 +409,9 @@ void lab4()
 	matrix ud2 = NAN;
 
 	//solution grad_result = SD(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
-	solution grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
-	std::cout << "Gradient Calculation Result:\n" << grad_result << "\n";
+	//solution grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+	solution grad_result = Newton(ff4T, gf4T, hf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+	std::cout << grad_result << "\n";
 #endif
 }
 
