@@ -273,3 +273,34 @@ matrix hf4T(matrix x, matrix ud1, matrix ud2) {
 
 	return H;
 }
+
+//double h_theta(const matrix& x, const matrix& theta) {
+//	matrix value = trans(theta) * x;
+//	return 1.0 / (1.0 + exp(-value(0)));
+//}
+//
+//static array<matrix, 100> X;
+//static array<matrix, 100> Y;
+//
+//void import4R(array<matrix, 100> &x, array<matrix, 100> &y) {
+//	X = x;	//z jakiegos powodu jest problem z X i Y, nie wiem jak go rozwiazac
+//	Y = y;
+//}
+//
+//matrix ff4R(matrix theta, matrix ud1, matrix ud2) {
+//	double sum = 0.0;
+//	for (int i = 0; i < 100; i++) {
+//		sum += (Y[i] * log(h_theta(X[i], theta)) + (1 - Y[i]) * log(1 - h_theta(X[i], theta)));
+//	}
+//	return sum / 100.0;
+//}
+//
+//matrix ff4R_2(matrix theta, matrix ud1, matrix ud2) {
+//	double sum = 0.0;
+//	for (int i = 0; i < 100; i++) {
+//		for (int j = 0; j < 3; j++) {
+//			sum += ((h_theta(X[i], theta) - Y[i]) * pow(X[i][j]));
+//		}
+//	}
+//	return sum / 100.0;
+//}
