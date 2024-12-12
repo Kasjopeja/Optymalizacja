@@ -573,8 +573,20 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 		double h;
 		while (true) {
 			Xopt.x = x_next;
-			d = -Xopt.grad(gf);
-			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
+			d = -Xopt.grad(gf,ud1,ud2);
+
+			// Zmienny krok h z metodą złotego podziału
+			if (h0 <= 0) {
+				matrix h_fun_data(2, 2);
+				h_fun_data.set_col(Xopt.x, 0);
+				h_fun_data.set_col(d, 1);
+				solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
+				h = h_sol.x(0); // Przyjęcie znalezionego optymalnego kroku
+			}
+			else {
+				h = h0; // Stały krok
+			}
+
 			x_next = Xopt.x + h * d;
 			i++;
 			if (Xopt.g_calls > Nmax) {
@@ -587,6 +599,7 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 			}
 		}
 
+		Xopt.fit_fun(ff,ud1,ud2);
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -599,42 +612,65 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 {
 	try
 	{
-		solution Xopt;
-		//Tu wpisz kod funkcji
-		int i = 0;
-		Xopt.x = x0;
-		solution x_next = Xopt.x;
+		std::stringstream ss{};
+
+		solution XB;
+		XB.x = x0;
+
+		solution XT;
+		matrix g_prev;
+		matrix g_curr;
 		matrix d;
-		double h;
-		matrix beta;
-		while (true) {
-			if (i > 0)
+
+		XB.grad(gf, ud1, ud2);
+		g_prev = XB.g;
+		d = -g_prev;
+
+		while (true)
+		{
+			ss << XB.x(0) << ";" << XB.x(1) << "\n";
+			//Metoda zmiennokrokowa
+			if (h0 <= 0)
 			{
-				d = -Xopt.grad(gf);
+				matrix h_fun_data(2, 2);
+				h_fun_data.set_col(XB.x, 0);
+				h_fun_data.set_col(d, 1);
+				solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
+				matrix h = h_sol.x;
+				XT.x = XB.x + h * d;
 			}
-			else {
-				beta = pow(norm(x_next.grad(gf)), 2) / pow(norm(Xopt.grad(gf)), 2);
-				d = -Xopt.grad(gf) + beta * d;
+			//Metoda sta³okrokowa
+			else
+			{
+				XT.x = XB.x + h0 * d;
 			}
-			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
-			Xopt.x = x_next.x;
-			x_next.x = Xopt.x + h * d;
-			i++;
-			if (Xopt.g_calls > Nmax) {
-				Xopt.flag = 0;
+
+			if (solution::g_calls > Nmax)
+			{
+
+				XT.fit_fun(ff, ud1, ud2);
+				return XT;
+			}
+
+			if (norm(XT.x - XB.x) <= epsilon)
 				break;
-			}
-			if (norm(x_next.x - Xopt.x) < epsilon) {
-				Xopt.flag = 1;
-				break;
-			}
+
+			XT.grad(gf, ud1, ud2);
+			g_curr = XT.g;
+
+			double beta = pow(norm(g_curr), 2) / pow(norm(g_prev), 2);
+			d = -g_curr + beta * d;
+
+			g_prev = g_curr;
+			XB = XT;
 		}
 
-		return Xopt;
+		XT.fit_fun(ff, ud1, ud2);
+		return XT;
 	}
 	catch (string ex_info)
 	{
-		throw ("solution SD(...):\n" + ex_info);
+		throw ("solution CG(...):\n" + ex_info);
 	}
 }
 
@@ -644,31 +680,46 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		// Inicjalizacja
 		int i = 0;
 		Xopt.x = x0;
 		matrix x_next = Xopt.x;
 		matrix d;
-		double h; //krok
-		matrix H; //hesjan
+		double h; // krok
+		matrix H; // hesjan
+
 		while (true) {
 			Xopt.x = x_next;
-			H = Xopt.hess(Hf);
+			H = Xopt.hess(Hf, ud1, ud2);
 			H = inv(H);
-			h = h0; //najpierw dla stalego h potem ma byc liczone z golden()
-			d = -H * Xopt.grad(gf);
+			d = -H * Xopt.grad(gf, ud1, ud2);
+
+			// Zmienny krok h z metodą złotego podziału
+			if (h0 <= 0) {
+				matrix h_fun_data(2, 2);
+				h_fun_data.set_col(Xopt.x, 0);
+				h_fun_data.set_col(d, 1);
+				solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
+				h = h_sol.x(0); // Przyjęcie znalezionego optymalnego kroku
+			}
+			else {
+				h = h0; // Stały krok
+			}
+
 			x_next = Xopt.x + h * d;
+
 			i++;
-			if (Xopt.g_calls > Nmax || Xopt.H_calls > Nmax || Xopt.f_calls > 0) {
-				Xopt.flag = 0;
+			if (Xopt.g_calls > Nmax || Xopt.H_calls > Nmax || Xopt.f_calls > Nmax) {
+				Xopt.flag = 0; // Przekroczono maksymalną liczbę wywołań
 				break;
 			}
 			if (norm(x_next - Xopt.x) < epsilon) {
-				Xopt.flag = 1;
+				Xopt.flag = 1; // Konwergencja
 				break;
 			}
 		}
 
+		Xopt.fit_fun(ff, ud1, ud2);
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -681,43 +732,42 @@ solution golden(matrix(*ff)(matrix, matrix, matrix), double a, double b, double 
 {
 	try
 	{
-		//Jest chyba dobrze zaimplementowana ale nie do konca wiem jak to wykorzystac w funkcjach SD, CG, Newton
-		//Wiem ze trzeba ja uzyc do obliczania h, ale nie jestem pewny jak to dokladnie bedzie wygladac
-		//Wtedy krok w pseudokodzie "wyznacz h(i)" zamiast uzywania stalej wartosci h0 uzywa golden do wyznaczenia jej dynamicznie
 		solution Xopt;
-		//Tu wpisz kod funkcji
 		double alpha = (pow(5, 0.5) - 1) / 2;
-		solution as, bs, cs, ds;
-		as.x = a;
-		bs.x = b;
-		cs.x = bs.x - alpha * (bs.x - as.x);
-		ds.x = as.x + alpha * (bs.x - as.x);
-		while (true) {
-			cs.fit_fun(ff);
-			ds.fit_fun(ff);
-			if (cs.y < ds.y) {
-				bs.x = ds.x;
-				ds.x = cs.x;
-				cs.x = bs.x - alpha * (bs.x - as.x);
-			}
-			else {
-				as.x = cs.x;
-				bs.x = ds.x;
-				cs.x = ds.x;
-				ds.x = as.x + alpha * (bs.x - as.x);
-			}
-			if (Xopt.f_calls > 0) {
-				Xopt.flag = 0;
-				break;
-			}
-			if (bs.x - as.x < epsilon) {
-				Xopt.flag = 1;
-				break;
-			}
-		}
+		double a0 = a;
+		double b0 = b;
+		double c0 = b0 - alpha * (b0 - a0);
+		double d0 = a0 + alpha * (b0 - a0);
 
-		Xopt.x = (as.x + bs.x) / 2;
+		do
+		{
+			solution c0_sol;
+			c0_sol.x = c0;
+			c0_sol.fit_fun(ff, ud1, ud2);
 
+			solution d0_sol;
+			d0_sol.x = d0;
+			d0_sol.fit_fun(ff, ud1, ud2);
+
+			if (c0_sol.y < d0_sol.y)
+			{
+				b0 = d0;
+				d0 = c0;
+				c0 = b0 - alpha * (b0 - a0);
+			}
+			else
+			{
+				c0 = d0;
+				a0 = c0;
+				d0 = a0 + alpha * (b0 - a0);
+			}
+
+			if (solution::f_calls > Nmax)
+				throw std::string("Maximum amount of f_calls reached!: ");
+
+		} while (b0 - a0 > epsilon);
+
+		Xopt.x = (a0 + b0) / 2;
 		return Xopt;
 	}
 	catch (string ex_info)

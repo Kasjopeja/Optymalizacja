@@ -314,7 +314,7 @@ void lab3()
 	// Dane a dla testów
 	matrix a = matrix(4.0);
 
-	// Punkty startowe dla testów
+	// Punkty startowe dla testów+
 	matrix test_x0{};
 
 	for (int i = 0; i < 3; ++i) {
@@ -397,21 +397,67 @@ void lab3()
 
 void lab4()
 {
-#ifdef TEORETYCZNE4
 	double epsilon = 1e-6;
 	double h0 = 0.05;
 	double a = 0.0;
 	double b = 1.0;
-	int Nmax = 1000;
+	int Nmax = 10000;
 
-	matrix x0 = matrix(2, new double[2] {0.0, 0.0});
+	std::ofstream Sout("symulacja_lab4.csv");
+
+#ifdef TEORETYCZNE4
+
+	// Generator liczb losowych
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> x0_dist(-10.0, 10.0);
+
+	std::stringstream results;
+
+	matrix x0 = matrix(2, new double[2] {0,0});
 	matrix ud1 = NAN;
 	matrix ud2 = NAN;
 
-	//solution grad_result = SD(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
-	//solution grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
-	solution grad_result = Newton(ff4T, gf4T, hf4T, x0, h0, epsilon, Nmax, ud1, ud2);
-	std::cout << grad_result << "\n";
+	solution grad_result;
+
+	for (int i = 0; i < 3; ++i) {
+		if (i == 0)
+			h0 = 0.05;
+		else if (i == 1)
+			h0 = 0.12;
+		else
+			h0 = 0;
+
+		for (int j = 0; j < 100; ++j) {
+
+			//generowanie punktów startowych 
+			x0 = matrix(2, new double[2] {x0_dist(gen), x0_dist(gen)});
+			results << x0(0) << "X ;" << x0(1) << "X ;";
+
+			// Najszybszego spadku
+			grad_result = SD(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;";
+			std::cout << grad_result << "\n";
+			solution::clear_calls();
+
+			// gradnentów sprzeżonych
+			grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;";
+			std::cout << grad_result << "\n";
+			solution::clear_calls();
+
+			// Newton
+			grad_result = Newton(ff4T, gf4T, hf4T, x0, h0, epsilon, Nmax, ud1, ud2);
+			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;" << grad_result.H_calls << "x \n";
+			std::cout << grad_result << "\n";
+			solution::clear_calls();
+
+		}
+	}
+
+	Sout << results.str();
+	Sout.close();
+
 #endif
 }
 
