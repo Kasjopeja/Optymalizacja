@@ -10,6 +10,7 @@ Data ostatniej modyfikacji: 19.09.2023
 
 #include"opt_alg.h"
 #include"user_funs.h"
+#include "file_reader.h"
 
 void lab0();
 void lab1();
@@ -23,7 +24,7 @@ int main()
 {
 	try
 	{	
-		#define TEORETYCZNE4
+		#define PRAKTYCZNE4
 
 		lab0();
 		lab1();
@@ -431,34 +432,68 @@ void lab4()
 		for (int j = 0; j < 100; ++j) {
 
 			//generowanie punktów startowych 
-			x0 = matrix(2, new double[2] {x0_dist(gen), x0_dist(gen)});
+			x0 = matrix(2, new double[2] {-9.29,2.4});
 			results << x0(0) << "X ;" << x0(1) << "X ;";
 
 			// Najszybszego spadku
 			grad_result = SD(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
 			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;";
-			std::cout << grad_result << "\n";
+			//std::cout << grad_result << "\n";
 			solution::clear_calls();
 
 			// gradnentów sprzeżonych
 			grad_result = CG(ff4T, gf4T, x0, h0, epsilon, Nmax, ud1, ud2);
 			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;";
-			std::cout << grad_result << "\n";
+			//std::cout << grad_result << "\n";
 			solution::clear_calls();
 
 			// Newton
 			grad_result = Newton(ff4T, gf4T, hf4T, x0, h0, epsilon, Nmax, ud1, ud2);
 			results << grad_result.x(0) << "x ;" << grad_result.x(1) << "x ;" << grad_result.y << "x ;" << grad_result.f_calls << "x ;" << grad_result.g_calls << "x ;" << grad_result.H_calls << "x \n";
-			std::cout << grad_result << "\n";
+			//std::cout << grad_result << "\n";
 			solution::clear_calls();
 
 		}
 	}
 
-	Sout << results.str();
+	//Sout << results.str();
 	Sout.close();
 
 #endif
+
+#ifdef PRAKTYCZNE4
+
+	//Pobieranie danych z pliku
+	matrix x_data = file_reader::fileToMatrix(3, 100, "./XData.txt");
+	matrix y_data = file_reader::fileToMatrix(1, 100, "./YData.txt");
+
+	//Początkowe theta
+	matrix theta_start = matrix(3, new double[3] {0.0, 0.0, 0.0});
+
+	//Długości kroków
+	double h0_arr_sim[] = { 0.01, 0.001, 0.0001 };
+
+	for (auto& h0 : h0_arr_sim)
+	{
+		//Wyliczanie optymalnych parametrów klasyfikatora
+		solution theta_opt = CG(ff4R, gf4R, theta_start, h0, epsilon, Nmax, x_data, y_data);
+		std::cout << theta_opt << "\n";
+
+		//Obliczanie procentu dostających się osób
+		double percentage = 0;
+		for (int i = 0; i < 100; ++i)
+		{
+			matrix curr_x = x_data[i];
+			matrix curr_y = y_data[i];
+			double calculated_value = sigmoid(theta_opt.x, curr_x);
+			if (round(calculated_value) == curr_y)
+				++percentage;
+		}
+		std::cout << "Percentage: " << percentage << "\n\n\n";
+		solution::clear_calls();
+	}
+
+#endif // PRAKTYCZNE4
 }
 
 void lab5()

@@ -572,7 +572,10 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 		matrix d;
 		double h;
 		while (true) {
+			//cout << Xopt.x(0) << endl;
+			//cout<< Xopt.x(1) << endl;
 			Xopt.x = x_next;
+
 			d = -Xopt.grad(gf,ud1,ud2);
 
 			// Zmienny krok h z metodą złotego podziału
@@ -628,6 +631,7 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 
 		while (true)
 		{
+
 			ss << XB.x(0) << ";" << XB.x(1) << "\n";
 			//Metoda zmiennokrokowa
 			if (h0 <= 0)
@@ -663,6 +667,9 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 
 			g_prev = g_curr;
 			XB = XT;
+
+			//cout << XT.x(0) << endl;
+			//cout << XT.x(1) << endl;
 		}
 
 		XT.fit_fun(ff, ud1, ud2);
@@ -689,6 +696,9 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 		matrix H; // hesjan
 
 		while (true) {
+			//cout << Xopt.x(0) << endl;
+			//cout << Xopt.x(1) << endl;
+
 			Xopt.x = x_next;
 			H = Xopt.hess(Hf, ud1, ud2);
 			H = inv(H);
