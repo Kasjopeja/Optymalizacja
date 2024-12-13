@@ -26,3 +26,6 @@ matrix hf4T(matrix, matrix = NAN, matrix = NAN);
 matrix ff4R(matrix, matrix = NAN, matrix = NAN);
 matrix gf4R(matrix, matrix = NAN, matrix = NAN);
 double sigmoid(matrix theta, matrix x);
+
+matrix ff5T(matrix, matrix = NAN, matrix = NAN);
+matrix ff5R(matrix, matrix = NAN, matrix = NAN);
