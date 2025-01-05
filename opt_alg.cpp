@@ -559,7 +559,6 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 	}
 }
 
-
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
 	try
@@ -792,7 +791,69 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 	{
 		solution Xopt;
 		//Tu wpisz kod funkcji
+		Xopt = x0;
 
+		//Macierz diagonalna (linijka 2 pseudokodu)
+		int n = get_len(x0);
+		vector<matrix> d_vector;
+
+		for (int j = 1; j <= n; j++) {
+			matrix d = matrix(n, n);
+			for (int i = 0; i < n; ++i) {
+				d(i, i) = 1.0;
+			}
+			d_vector.push_back(d);
+		}
+
+		while (true) {
+			vector<solution> p_vector;
+			p_vector.push_back(Xopt);
+			for (int j = 1; j <= n; j++) {
+				//Wyznaczenie h, nie jestem pewny czy dobrze (linijka 6 pseudokodu), glownie tego czy jest tutaj dobre d
+				double h;
+				matrix h_fun_data(2, 2);
+				h_fun_data.set_col(Xopt.x, 0);
+				h_fun_data.set_col(d_vector[j], 1);
+				solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
+				h = h_sol.x(0);
+
+				p_vector.push_back(p_vector[j - 1].x(0) + h * d_vector[j - 1]);
+			}
+			if (norm(p_vector[n].x(0) - Xopt.x(0)) < epsilon) {
+				Xopt.flag = 1;
+				Xopt.fit_fun(ff); //Nie jestem pewny poprawnosci tej linijki
+				return Xopt;
+			}
+
+			//Nie rozumiem jak maja dzialac linijki 12-14 pseudokodu, macierz d z tego co rozumiem ma byc 
+			//macierza diagonalna wypelniona jedynkami (jak w labie 3 w Nelder-Meadzie) wiec 
+			//nie rozumiem co ma robic ta petla. Zakladam ze tych macierzy ma byc wiele, ale no nie 
+			//pojmuje zbytnio dlaczego skoro sa identyczne (?)
+
+			for (int j = 1; j < n; j++) {
+				d_vector[j - 1] = d_vector[j];
+			}
+
+			d_vector[n] = p_vector[n].x(0) - p_vector[0].x(0);
+
+			//Tu to samo co wyzej, nie jestem pewny tego czy to jest dobre d
+			double h;
+			matrix h_fun_data(2, 2);
+			h_fun_data.set_col(Xopt.x, 0);
+			h_fun_data.set_col(d_vector[n], 1);
+			solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
+			h = h_sol.x(0);
+
+			p_vector.push_back(p_vector[n].x(0) + h * d_vector[n]);
+			Xopt.x(0) = p_vector[n + 1].x(0);
+
+			if (solution::f_calls > Nmax) {
+				Xopt.flag = 0;
+				break;
+			}
+		}
+
+		Xopt.fit_fun(ff); //Nie jestem pewny poprawnosci tej linijki
 		return Xopt;
 	}
 	catch (string ex_info)
