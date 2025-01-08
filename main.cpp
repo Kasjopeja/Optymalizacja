@@ -24,7 +24,7 @@ int main()
 {
 	try
 	{	
-		#define PRAKTYCZNE4
+		#define TEORETYCZNE5
 
 		lab0();
 		lab1();
@@ -498,7 +498,15 @@ void lab4()
 
 void lab5()
 {
+	matrix x0(2, 1);
+	x0(0, 0) = 0;
+	x0(1, 0) = 0;
+	int Nmax = 10000;
+	double epsilon = 0.00001;
 
+#ifdef TEORETYCZNE5
+	cout << Powell(ff4T, x0, epsilon, Nmax, NAN, NAN);
+#endif
 }
 
 void lab6()

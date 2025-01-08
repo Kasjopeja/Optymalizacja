@@ -352,4 +352,5 @@ matrix ff5R(matrix x, matrix ud1, matrix ud2)
 		if (yt(1) > 0.005) y = y + c * pow(yt(1) - 0.005, 2);
 		if (yt(2) > 300e6) y = y + c * pow(yt(2) - 300e6, 2);
 	}
+	return y;
 }

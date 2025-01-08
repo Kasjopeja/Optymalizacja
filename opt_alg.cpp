@@ -810,8 +810,8 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 				//Wyznaczenie h, nie jestem pewny czy dobrze (linijka 6 pseudokodu), glownie tego czy jest tutaj dobre d [juz zamienione, powinno byc dobrze]
 				double h;
 				matrix h_fun_data(2, 2);
-				h_fun_data.set_col(Xopt.x, 0);
-				h_fun_data.set_col(d_vector[j], 1);
+				h_fun_data.set_col(Xopt.x, 0);				//tu sie pieprzy, nie wiem dlaczego (w ktoryms z set_col)
+				h_fun_data.set_col(d_vector[j - 1], 1);
 				solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
 				h = h_sol.x(0);
 
@@ -827,18 +827,18 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 				d_vector[j - 1] = d_vector[j];
 			}
 
-			d_vector[n] = p_vector[n].x(0) - p_vector[0].x(0);
+			d_vector[n-1] = p_vector[n-1].x(0) - p_vector[0].x(0);
 
 			//Tu to samo co wyzej, nie jestem pewny tego czy to jest dobre d [juz zamienione, powinno byc dobrze]
 			double h;
 			matrix h_fun_data(2, 2);
 			h_fun_data.set_col(Xopt.x, 0);
-			h_fun_data.set_col(d_vector[n], 1);
+			h_fun_data.set_col(d_vector[n - 1], 1);
 			solution h_sol = golden(ff, 0, 1, epsilon, Nmax, ud1, h_fun_data);
 			h = h_sol.x(0);
 
-			p_vector.push_back(p_vector[n].x(0) + h * d_vector[n]);
-			Xopt.x(0) = p_vector[n + 1].x(0);
+			p_vector.push_back(p_vector[n - 1].x(0) + h * d_vector[n - 1]);
+			Xopt.x(0) = p_vector[n].x(0);
 
 			if (solution::f_calls > Nmax) {
 				Xopt.flag = 0;
