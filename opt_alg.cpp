@@ -797,11 +797,9 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 		int n = get_len(x0);
 		vector<matrix> d_vector;
 
-		for (int j = 1; j <= n; j++) {
-			matrix d = matrix(n, n);
-			for (int i = 0; i < n; ++i) {
-				d(i, i) = 1.0;
-			}
+		for (int j = 0; j < n; j++) {
+			matrix d(n, 1);
+			d(j, 0) = 1.0;
 			d_vector.push_back(d);
 		}
 
@@ -809,7 +807,7 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 			vector<solution> p_vector;
 			p_vector.push_back(Xopt);
 			for (int j = 1; j <= n; j++) {
-				//Wyznaczenie h, nie jestem pewny czy dobrze (linijka 6 pseudokodu), glownie tego czy jest tutaj dobre d
+				//Wyznaczenie h, nie jestem pewny czy dobrze (linijka 6 pseudokodu), glownie tego czy jest tutaj dobre d [juz zamienione, powinno byc dobrze]
 				double h;
 				matrix h_fun_data(2, 2);
 				h_fun_data.set_col(Xopt.x, 0);
@@ -825,18 +823,13 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 				return Xopt;
 			}
 
-			//Nie rozumiem jak maja dzialac linijki 12-14 pseudokodu, macierz d z tego co rozumiem ma byc 
-			//macierza diagonalna wypelniona jedynkami (jak w labie 3 w Nelder-Meadzie) wiec 
-			//nie rozumiem co ma robic ta petla. Zakladam ze tych macierzy ma byc wiele, ale no nie 
-			//pojmuje zbytnio dlaczego skoro sa identyczne (?)
-
 			for (int j = 1; j < n; j++) {
 				d_vector[j - 1] = d_vector[j];
 			}
 
 			d_vector[n] = p_vector[n].x(0) - p_vector[0].x(0);
 
-			//Tu to samo co wyzej, nie jestem pewny tego czy to jest dobre d
+			//Tu to samo co wyzej, nie jestem pewny tego czy to jest dobre d [juz zamienione, powinno byc dobrze]
 			double h;
 			matrix h_fun_data(2, 2);
 			h_fun_data.set_col(Xopt.x, 0);
