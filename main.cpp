@@ -498,15 +498,29 @@ void lab4()
 
 void lab5()
 {
-	matrix x0(2, 1);
-	x0(0, 0) = 0;
-	x0(1, 0) = 0;
-	int Nmax = 10000;
-	double epsilon = 0.00001;
 
 #ifdef TEORETYCZNE5
-	cout << Powell(ff4T, x0, epsilon, Nmax, NAN, NAN);
-#endif
+
+	matrix X;
+	double w = 0.01, a = 1, epsilon = 0.0001;
+	int Nmax = 1000;
+	matrix ud1 = matrix(2, new double[2] {w, a});
+	matrix ud2 = NAN;
+
+	solution result;
+
+	double x1 = ((rand() % 200) / 100.0) - 1;
+	double x2 = ((rand() % 200) / 100.0) - 1;
+	X = matrix(2, new double[2] {x1, x2});
+	result = Powell(ff5T, X, epsilon, Nmax, ud1, ud2);
+	cout << result;
+
+
+#endif // TEORETYCZNE5
+
+#ifdef PRAKTYCZNE5
+
+#endif // PRAKTYCZNE5
 }
 
 void lab6()
