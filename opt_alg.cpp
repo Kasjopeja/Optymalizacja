@@ -819,7 +819,7 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 			}
 			if (norm(p_vector[n].x(0) - Xopt.x(0)) < epsilon) {
 				Xopt.flag = 1;
-				Xopt.fit_fun(ff); //Nie jestem pewny poprawnosci tej linijki
+				Xopt.fit_fun(ff, ud1); //Nie jestem pewny poprawnosci tej linijki
 				return Xopt;
 			}
 

@@ -320,12 +320,14 @@ matrix ff5T(matrix x, matrix ud1, matrix ud2)
 	matrix y;
 	if (isnan(ud2(0, 0))) {
 		y = matrix(2, 1);
-		y(0) = ud1(1) * (pow(x(0) - 2, 2) + pow(x(1) - 2, 2));
-		y(1) = (1/ud1(1)) * (pow(x(0) + 2, 2) + pow(x(1) + 2, 2));
+		//y(0) = ud1(1) * (pow(x(0) - 2, 2) + pow(x(1) - 2, 2));
+		//y(1) = (1/ud1(1)) * (pow(x(0) + 2, 2) + pow(x(1) + 2, 2));
+		y(0) = pow(x(0) - 2, 2) + pow(x(1) - 2, 2);
+		y(1) = pow(x(0) - 3, 2) + pow(x(1) - 3, 2);
 	}
 	else {
 		matrix yt;
-		yt = ff5T(ud2[0] + x * ud2[1]);
+		yt = ff5T(ud2[0] + x * ud2[1], ud1);
 		y = ud1(0) * yt(0) + (1 - ud1(0)) * yt(1);
 	}
 	return y;
