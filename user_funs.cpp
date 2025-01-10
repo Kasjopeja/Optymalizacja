@@ -320,10 +320,10 @@ matrix ff5T(matrix x, matrix ud1, matrix ud2)
 	matrix y;
 	if (isnan(ud2(0, 0))) {
 		y = matrix(2, 1);
-		//y(0) = ud1(1) * (pow(x(0) - 2, 2) + pow(x(1) - 2, 2));
-		//y(1) = (1/ud1(1)) * (pow(x(0) + 2, 2) + pow(x(1) + 2, 2));
-		y(0) = pow(x(0) - 2, 2) + pow(x(1) - 2, 2);
-		y(1) = pow(x(0) - 3, 2) + pow(x(1) - 3, 2);
+		y(0) = ud1(1) * (pow(x(0) - 2, 2) + pow(x(1) - 2, 2));
+		y(1) = (1/ud1(1)) * (pow(x(0) + 2, 2) + pow(x(1) + 2, 2));
+		//y(0) = pow(x(0) - 2, 2) + pow(x(1) - 2, 2);
+		//y(1) = pow(x(0) - 3, 2) + pow(x(1) - 3, 2);
 	}
 	else {
 		matrix yt;
@@ -347,10 +347,10 @@ matrix ff5R(matrix x, matrix ud1, matrix ud2)
 		yt = ff5R(xt, ud1);
 		y = ud1 * (yt(0) - 0.12) / (15.3 - 0.12) + (1 - ud1) * (yt(1) - 4.2e-5) / (3.2 - 4.2e-5);
 		double c = 1e10;
-		if (x(0) < 0.2) y = y + c * pow(0.2 - x(0), 2);
-		if (x(0) > 1) y = y + c * pow(x(0) - 1, 2);
-		if (x(1) < 0.01) y = y + c * pow(0.01 - x(1), 2);
-		if (x(1) > 0.05) y = y + c * pow(x(1) - 0.05, 2);
+		if (xt(0) < 0.2) y = y + c * pow(0.2 - xt(0), 2);
+		if (xt(0) > 1) y = y + c * pow(xt(0) - 1, 2);
+		if (xt(1) < 0.01) y = y + c * pow(0.01 - xt(1), 2);
+		if (xt(1) > 0.05) y = y + c * pow(xt(1) - 0.05, 2);
 		if (yt(1) > 0.005) y = y + c * pow(yt(1) - 0.005, 2);
 		if (yt(2) > 300e6) y = y + c * pow(yt(2) - 300e6, 2);
 	}
