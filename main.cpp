@@ -24,7 +24,7 @@ int main()
 {
 	try
 	{	
-		#define TEORETYCZNE6
+		#define PRAKTYCZNE6
 
 		lab0();
 		lab1();
@@ -580,17 +580,30 @@ void lab6()
 	int Nmax = 10000;
 
 #ifdef TEORETYCZNE6
+
 	for (int i = 0; i < 100; i++)
 	{
 		solution result = EA(ff6T, N, lb, ub, mi, lambda, sigma_tab[0], epsilon, Nmax);
-		
 		cout << result;
-
 		solution::clear_calls();
 	}
-#endif // TEORETYCZNE5
+
+#endif // TEORETYCZNE6
 
 #ifdef PRAKTYCZNE6
 
-#endif // PRAKTYCZNE5
+	matrix data = file_reader::fileToMatrix(1001, 2, "./polozenia.txt");
+
+	lb = matrix(2, 1, 0.1);
+	ub = matrix(2, 1, 3);
+
+	solution result = EA(ff6R, N, lb, ub, mi, lambda, matrix(2, 1, 1), 1e-2, Nmax, 1001, data);
+	solution::clear_calls();
+
+	matrix y;
+	matrix Y0(4, 1);
+	matrix* Y = solve_ode(df6, 0, 0.1, 100, Y0, NAN, result.x[0]);
+	cout << Y[1];
+
+#endif // PRAKTYCZNE6
 }
