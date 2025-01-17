@@ -24,7 +24,7 @@ int main()
 {
 	try
 	{	
-		#define PRAKTYCZNE5
+		#define TEORETYCZNE6
 
 		lab0();
 		lab1();
@@ -563,5 +563,34 @@ void lab5()
 
 void lab6()
 {
+	double sigma_tab[] = { 0.01, 0.1, 1, 10, 100 };
+	int N = 2;
 
+	matrix lb(N, 1);
+	lb(0) = -5;
+	lb(1) = -5;
+
+	matrix ub(N, 1);
+	ub(0) = 5;
+	ub(1) = 5;
+
+	int mi = 20;
+	int lambda = 40;
+	double epsilon = 1e-5;
+	int Nmax = 10000;
+
+#ifdef TEORETYCZNE6
+	for (int i = 0; i < 100; i++)
+	{
+		solution result = EA(ff6T, N, lb, ub, mi, lambda, sigma_tab[0], epsilon, Nmax);
+		
+		cout << result;
+
+		solution::clear_calls();
+	}
+#endif // TEORETYCZNE5
+
+#ifdef PRAKTYCZNE6
+
+#endif // PRAKTYCZNE5
 }

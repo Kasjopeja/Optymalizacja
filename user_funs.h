@@ -31,5 +31,5 @@ matrix ff5T(matrix, matrix = NAN, matrix = NAN);
 matrix ff5R(matrix, matrix = NAN, matrix = NAN);
 
 matrix ff6T(matrix, matrix = NAN, matrix = NAN);
-matrix df6(double, matrix, matrix = NAN, matrix = NAN));
+matrix df6(double, matrix, matrix = NAN, matrix = NAN);
 matrix ff6R(matrix, matrix = NAN, matrix = NAN);
