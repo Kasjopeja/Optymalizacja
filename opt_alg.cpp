@@ -43,8 +43,8 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 		solution X0(x0);
 		solution X1(x0 + d);
 		//solution X2;
-		X0.fit_fun(ff);
-		X1.fit_fun(ff);
+		X0.fit_fun(ff, ud1, ud2);
+		X1.fit_fun(ff, ud1, ud2);
 		vector<solution> x_vector;
 		x_vector.push_back(X0);
 		x_vector.push_back(X1);
@@ -58,7 +58,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 		if (X1.y(0) > X0.y(0)) {
 			d = -d;
 			X1.x(0) = X0.x(0) + d;
-			X1.fit_fun(ff);
+			X1.fit_fun(ff, ud1, ud2);
 			x_vector[1] = X1;
 			if (X1.y(0) >= X0.y(0)) {
 				p[0] = X1.x(0);
@@ -74,7 +74,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 				break;
 			i++;
 			x_vector.push_back(x0 + (pow(alpha, i) * d));
-			x_vector[i + 1].fit_fun(ff); // Obliczenie y ostatniego elementu wektora
+			x_vector[i + 1].fit_fun(ff, ud1, ud2); // Obliczenie y ostatniego elementu wektora
 		} while (x_vector[i].y(0) >= x_vector[i + 1].y(0));
 		if (d > 0)
 		{
@@ -559,7 +559,6 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 	}
 }
 
-
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
 	try
@@ -791,15 +790,62 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+
+		int n = get_len(x0);
+		matrix D = ident_mat(n), A(n, 2);
+		solution X, P, h;
+		X.x = x0;
+		double* ab;
+
+		while (true)
+		{
+			P = X;
+
+			for (int i = 0; i < n; ++i)
+			{
+				A.set_col(P.x, 0);
+				A.set_col(D[i], 1);
+				ab = expansion(ff, 0, 1, 1.2, Nmax, ud1, A);
+				h = golden(ff, ab[0], ab[1], epsilon, Nmax, ud1, A);
+				P.x = P.x + h.x * D[i];
+			}
+
+			if (norm(P.x - X.x) < epsilon)
+			{
+				Xopt = X;
+				Xopt.fit_fun(ff, ud1, ud2);
+				Xopt.flag = 0;
+				break;
+			}
+
+			if (solution::f_calls > Nmax)
+			{
+				Xopt = X;
+				Xopt.fit_fun(ff, ud1, ud2);
+				Xopt.flag = 1;
+				break;
+			}
+
+			for (int i = 0; i < n - 1; ++i)
+				D.set_col(D[i + 1], i);
+
+			D.set_col(P.x - X.x, n - 1);
+			A.set_col(P.x, 0);
+			A.set_col(D[n - 1], 1);
+			ab = expansion(ff, 0, 1, 1.2, Nmax, ud1, A);
+			h = golden(ff, ab[0], ab[1], epsilon, Nmax, ud1, A);
+			X.x = P.x + h.x * D[n - 1];
+		}
 
 		return Xopt;
 	}
 	catch (string ex_info)
 	{
-		throw ("solution Powell(...):\n" + ex_info);
+		throw("solution Powell(...):\n" + ex_info);
 	}
 }
+
+
 
 solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, int mi, int lambda, matrix sigma0, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {
